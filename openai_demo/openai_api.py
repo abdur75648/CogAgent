@@ -17,7 +17,11 @@ from transformers import AutoModelForCausalLM, LlamaTokenizer, PreTrainedModel, 
 from PIL import Image
 from io import BytesIO
 
-MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/cogvlm-chat-hf')
+MODEL_PATH = os.environ.get('MODEL_PATH', '//workspace/CogVLM/finetune_demo/checkpoints/finetune-cogagent-vqa-01-29-10-19/2000/mp_rank_00_model_states.pt')
+# MODEL_PATH = os.environ.get('MODEL_PATH', "/workspace/CogVLM/finetune_demo/checkpoints/finetune-cogagent-vqa-01-29-10-19")
+# MODEL_PATH = os.environ.get('MODEL_PATH', "/workspace/CogVLM/finetune_demo/checkpoints/finetune-cogagent-vqa-01-29-10-19")
+
+
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", 'lmsys/vicuna-7b-v1.5')
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 if os.environ.get('QUANT_ENABLED'):
@@ -396,5 +400,9 @@ if __name__ == "__main__":
             ).to(DEVICE).eval()
             
     else:
-        model = AutoModelForCausalLM.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
+        # model = AutoModelForCausalLM.from_pretrained(MODEL_PATH, trust_remote_code=True).float().to(DEVICE).eval()
+        
+        model_state_dict = torch.load(model_path)
+        model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=None, state_dict=model_state_dict, trust_remote_code=True).float().to(DEVICE).eval()
+        
     uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)

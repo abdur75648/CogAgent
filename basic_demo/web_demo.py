@@ -210,7 +210,7 @@ def main(args):
 
 
     # demo.queue(concurrency_count=10)
-    demo.launch()
+    demo.launch(share=True)
 
 
 if __name__ == '__main__':

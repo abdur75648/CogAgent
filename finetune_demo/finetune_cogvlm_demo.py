@@ -39,6 +39,7 @@ def disable_untrainable_params(self):
 FineTuneTrainCogVLMModel.disable_untrainable_params = disable_untrainable_params
 
 def data_collator(examples):
+    
     examples = [ex for ex in examples if len(ex) > 0] # drop {}
     for example in examples:
         for k in example:

@@ -8,22 +8,30 @@ MP_SIZE=1
 script_path=$(realpath $0)
 script_dir=$(dirname $script_path)
 main_dir=$(dirname $script_dir)
-MODEL_TYPE="cogagent-chat"
-VERSION="chat"
+# MODEL_TYPE="cogagent-chat"
+MODEL_TYPE="cogagent-vqa"
+VERSION="vqa"
+# MODEL_ARGS="--from_pretrained $MODEL_TYPE \
+#     --max_length 400 \
+#     --lora_rank 50 \
+#     --use_lora \
+#     --local_tokenizer lmsys/vicuna-7b-v1.5 \
+#     --version $VERSION"
+
 MODEL_ARGS="--from_pretrained $MODEL_TYPE \
-    --max_length 400 \
-    --lora_rank 50 \
-    --use_lora \
+    --max_length 1024 \
     --local_tokenizer lmsys/vicuna-7b-v1.5 \
     --version $VERSION"
 # TIPS: max_length include low-resolution image sequence (which has 256 tokens) 
 
-OPTIONS_SAT="SAT_HOME=~/.sat_models"
+OPTIONS_SAT="SAT_HOME=../model"
 OPTIONS_NCCL="NCCL_DEBUG=info NCCL_IB_DISABLE=0 NCCL_NET_GDR_LEVEL=2 LOCAL_WORLD_SIZE=$NUM_GPUS_PER_WORKER"
 HOST_FILE_PATH="hostfile"
 
-train_data="./archive_split/train"
-valid_data="./archive_split/valid"
+# train_data="../archive_split/train"
+# valid_data="../archive_split/valid"
+train_data="../data/json/apollo_ferret_noscale.json"
+valid_data="../data/json/apollo_ferret_noscale.json"
 
 gpt_options=" \
        --experiment-name finetune-$MODEL_TYPE \
