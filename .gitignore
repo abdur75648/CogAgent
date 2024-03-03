@@ -11,4 +11,6 @@ hostfile
 runs/
 model/
 .deepspeed_env
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
 *.idea/
