@@ -66,7 +66,7 @@ def read_json(path):
     with open(path, 'r') as file:
         data = json.load(file)
         for item in data:
-            item['imagePath'] = "/workspace/CogVLM/data/images/apollo-1920-1080" + item['imagePath'][1:]
+            item['imagePath'] = "/workspace/CogAgent/data/" + item['imagePath'][1:]
         return data
 
 class ItemDataset(Dataset):

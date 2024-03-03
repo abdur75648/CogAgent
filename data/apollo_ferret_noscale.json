@@ -1,158 +1,158 @@
 [
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: None \nGive me the next action?",
-        "Answer": "CLICK: Click on the Search [0.010416666666666657, 0.18888888888888888, 0.14739583333333334, 0.23055555555555557] button.",
+        "Answer": "CLICK: Click on the Search [0.010416666666666657, 0.18888888888888888, 0.14739583333333334, 0.23055555555555557] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/a.png"
+        "imagePath": "./images/anish-wf-6/a.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Search button \nGive me the next action?",
-        "Answer": "CLICK: Click on the More Filters [0.2890625, 0.38888888888888884, 0.3744791666666667, 0.43333333333333335] button.",
+        "Answer": "CLICK: Click on the More Filters [0.2890625, 0.38888888888888884, 0.3744791666666667, 0.43333333333333335] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/b.png"
+        "imagePath": "./images/anish-wf-6/b.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the More Filters button \nGive me the next action?",
-        "Answer": "TYPE: Type Job Titles in the Search filters [0.2354166666666667, 0.3907407407407407, 0.415625, 0.4361111111111111] tab.",
+        "Answer": "TYPE: Type Job Titles in the Search filters [0.2354166666666667, 0.3907407407407407, 0.415625, 0.4361111111111111] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/c.png"
+        "imagePath": "./images/anish-wf-6/c.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: TYPE: Type Job Titles in the Search filters tab \nGive me the next action?",
-        "Answer": "CLICK: Click on the Job Titles [0.184375, 0.5018518518518519, 0.38958333333333334, 0.5657407407407408] button.",
+        "Answer": "CLICK: Click on the Job Titles [0.184375, 0.5018518518518519, 0.38958333333333334, 0.5657407407407408] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/d.png"
+        "imagePath": "./images/anish-wf-6/d.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Job Titles button \nGive me the next action?",
-        "Answer": "CLICK: Click on the Search for a job title [0.20572916666666663, 0.623148148148148, 0.36875, 0.6657407407407407] tab.",
+        "Answer": "CLICK: Click on the Search for a job title [0.20572916666666663, 0.623148148148148, 0.36875, 0.6657407407407407] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/e.png"
+        "imagePath": "./images/anish-wf-6/e.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Search for a job title tab \nGive me the next action?",
-        "Answer": "TYPE: Type product managers in the Search for a job title [0.20468750000000002, 0.6277777777777778, 0.36875, 0.6694444444444443] tab.",
+        "Answer": "TYPE: Type product managers in the Search for a job title [0.20468750000000002, 0.6277777777777778, 0.36875, 0.6694444444444443] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/f.png"
+        "imagePath": "./images/anish-wf-6/f.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: TYPE: Type product managers in the Search for a job title tab \nGive me the next action?",
-        "Answer": "CLICK: Click on the Search filters [0.2713541666666667, 0.3907407407407407, 0.45052083333333337, 0.43425925925925923] tab.",
+        "Answer": "CLICK: Click on the Search filters [0.2713541666666667, 0.3907407407407407, 0.45052083333333337, 0.43425925925925923] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/g.png"
+        "imagePath": "./images/anish-wf-6/g.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Search filters tab \nGive me the next action?",
-        "Answer": "TYPE: Type total years of experience in the Search filters [0.2708333333333333, 0.3916666666666666, 0.45, 0.4361111111111111] tab.",
+        "Answer": "TYPE: Type total years of experience in the Search filters [0.2708333333333333, 0.3916666666666666, 0.45, 0.4361111111111111] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/h.png"
+        "imagePath": "./images/anish-wf-6/h.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: TYPE: Type total years of experience in the Search filters tab \nGive me the next action?",
-        "Answer": "CLICK: Click on the Total Years of Experience [0.184375, 0.5037037037037037, 0.38958333333333334, 0.5648148148148148] button.",
+        "Answer": "CLICK: Click on the Total Years of Experience [0.184375, 0.5037037037037037, 0.38958333333333334, 0.5648148148148148] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/i.png"
+        "imagePath": "./images/anish-wf-6/i.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Total Years of Experience button \nGive me the next action?",
-        "Answer": "CLICK: Click on the Min year [0.19635416666666666, 0.5722222222222222, 0.28072916666666664, 0.6120370370370372] tab.",
+        "Answer": "CLICK: Click on the Min year [0.19635416666666666, 0.5722222222222222, 0.28072916666666664, 0.6120370370370372] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/j.png"
+        "imagePath": "./images/anish-wf-6/j.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Min year tab \nGive me the next action?",
-        "Answer": "TYPE: Type 5 in the Min year [0.19635416666666666, 0.5722222222222222, 0.28020833333333334, 0.6138888888888889] tab.",
+        "Answer": "TYPE: Type 5 in the Min year [0.19635416666666666, 0.5722222222222222, 0.28020833333333334, 0.6138888888888889] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/k.png"
+        "imagePath": "./images/anish-wf-6/k.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: TYPE: Type 5 in the Min year tab \nGive me the next action?",
-        "Answer": "CLICK: Click on the Search filters [0.2791666666666667, 0.38981481481481484, 0.46458333333333335, 0.43425925925925923] button.",
+        "Answer": "CLICK: Click on the Search filters [0.2791666666666667, 0.38981481481481484, 0.46458333333333335, 0.43425925925925923] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/l.png"
+        "imagePath": "./images/anish-wf-6/l.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Search filters button \nGive me the next action?",
-        "Answer": "TYPE: Type funding in the Search filters [0.2791666666666667, 0.38981481481481484, 0.4625, 0.43333333333333335] tab.",
+        "Answer": "TYPE: Type funding in the Search filters [0.2791666666666667, 0.38981481481481484, 0.4625, 0.43333333333333335] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/m.png"
+        "imagePath": "./images/anish-wf-6/m.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: TYPE: Type funding in the Search filters tab \nGive me the next action?",
-        "Answer": "CLICK: Click on the Funding [0.18489583333333337, 0.5037037037037038, 0.3890625, 0.5694444444444444] button.",
+        "Answer": "CLICK: Click on the Funding [0.18489583333333337, 0.5037037037037038, 0.3890625, 0.5694444444444444] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/n.png"
+        "imagePath": "./images/anish-wf-6/n.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Funding button \nGive me the next action?",
-        "Answer": "CLICK: Click on the Series A [0.190625, 0.7083333333333334, 0.38333333333333336, 0.7462962962962963] button.",
+        "Answer": "CLICK: Click on the Series A [0.190625, 0.7083333333333334, 0.38333333333333336, 0.7462962962962963] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/o.png"
+        "imagePath": "./images/anish-wf-6/o.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Series A button \nGive me the next action?",
-        "Answer": "CLICK: Click on the Search filters [0.27239583333333334, 0.3944444444444444, 0.45260416666666664, 0.4388888888888889] tab.",
+        "Answer": "CLICK: Click on the Search filters [0.27239583333333334, 0.3944444444444444, 0.45260416666666664, 0.4388888888888889] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/p.png"
+        "imagePath": "./images/anish-wf-6/p.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Search filters tab \nGive me the next action?",
-        "Answer": "TYPE: Type revenue in the Search filters [0.271875, 0.39166666666666666, 0.4520833333333333, 0.4351851851851852] tab.",
+        "Answer": "TYPE: Type revenue in the Search filters [0.271875, 0.39166666666666666, 0.4520833333333333, 0.4351851851851852] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/q.png"
+        "imagePath": "./images/anish-wf-6/q.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: TYPE: Type revenue in the Search filters tab \nGive me the next action?",
-        "Answer": "CLICK: Click on the Revenue [0.18489583333333331, 0.5037037037037038, 0.38958333333333334, 0.5666666666666667] button.",
+        "Answer": "CLICK: Click on the Revenue [0.18489583333333331, 0.5037037037037038, 0.38958333333333334, 0.5666666666666667] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/r.png"
+        "imagePath": "./images/anish-wf-6/r.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Revenue button \nGive me the next action?",
-        "Answer": "CLICK: Click on the Min [0.19791666666666663, 0.6194444444444445, 0.28125, 0.6601851851851852] tab.",
+        "Answer": "CLICK: Click on the Min [0.19791666666666663, 0.6194444444444445, 0.28125, 0.6601851851851852] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/s.png"
+        "imagePath": "./images/anish-wf-6/s.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Min tab \nGive me the next action?",
-        "Answer": "TYPE: Type 1000000 in the Min [0.1984375, 0.6129629629629629, 0.28229166666666666, 0.6527777777777779] tab.",
+        "Answer": "TYPE: Type 1000000 in the Min [0.1984375, 0.6129629629629629, 0.28229166666666666, 0.6527777777777779] tab",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/t.png"
+        "imagePath": "./images/anish-wf-6/t.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: TYPE: Type 1000000 in the Min tab \nGive me the next action?",
-        "Answer": "CLICK: Click on the Apply Filters [0.8963541666666668, 0.38425925925925924, 0.96875, 0.42962962962962964] button.",
+        "Answer": "CLICK: Click on the Apply Filters [0.8963541666666668, 0.38425925925925924, 0.96875, 0.42962962962962964] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/u.png"
+        "imagePath": "./images/anish-wf-6/u.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Apply Filters button \nGive me the next action?",
-        "Answer": "CLICK: Click on the Selection Dropdown [0.39739583333333334, 0.32407407407407407, 0.425, 0.3555555555555555] icon.",
+        "Answer": "CLICK: Click on the Selection Dropdown [0.39739583333333334, 0.32407407407407407, 0.425, 0.3555555555555555] icon",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/v.png"
+        "imagePath": "./images/anish-wf-6/v.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Selection Dropdown icon \nGive me the next action?",
-        "Answer": "CLICK: Click Select all people [0.3026041666666667, 0.42499999999999993, 0.5182291666666666, 0.4898148148148148] button.",
+        "Answer": "CLICK: Click Select all people [0.3026041666666667, 0.42499999999999993, 0.5182291666666666, 0.4898148148148148] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/w.png"
+        "imagePath": "./images/anish-wf-6/w.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click Select all people button \nGive me the next action?",
-        "Answer": "CLICK: Click on the Export [0.6348958333333333, 0.3175925925925926, 0.6572916666666667, 0.362962962962963] icon.",
+        "Answer": "CLICK: Click on the Export [0.6348958333333333, 0.3175925925925926, 0.6572916666666667, 0.362962962962963] icon",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/x.png"
+        "imagePath": "./images/anish-wf-6/x.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Export icon \nGive me the next action?",
-        "Answer": "CLICK: Click on the Export as CSV [0.28645833333333326, 0.6157407407407407, 0.6765625, 0.6962962962962964] button.",
+        "Answer": "CLICK: Click on the Export as CSV [0.28645833333333326, 0.6157407407407407, 0.6765625, 0.6962962962962964] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/y.png"
+        "imagePath": "./images/anish-wf-6/y.png"
     },
     {
         "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: CLICK: Click on the Export as CSV button \nGive me the next action?",
-        "Answer": "CLICK: Click on the Save [0.6739583333333332, 0.7194444444444446, 0.7109375, 0.7638888888888888] button.",
+        "Answer": "CLICK: Click on the Save [0.6739583333333332, 0.7194444444444446, 0.7109375, 0.7638888888888888] button",
         "workflow": "anish-wf-6",
-        "imagePath": "images/anish-wf-6/z.png"
+        "imagePath": "./images/anish-wf-6/z.png"
     }
 ]
