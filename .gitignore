@@ -9,8 +9,10 @@ examples/*grounding.png
 archive*
 hostfile
 runs/
-model/
 .deepspeed_env
 .ipynb_checkpoints/
 **/.ipynb_checkpoints/
 *.idea/
+model/cogagent-vqa/1/mp_rank_00_model_states.pt
+*.pt
+*.lock
