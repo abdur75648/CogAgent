@@ -12,7 +12,7 @@ apt-get install git-lfs
 git lfs install
 ```
 
-2. Clone this repository and navigate to FERRET folder
+2. Clone this repository and navigate to CogAgent folder
 ```bash
 git clone https://github.com/abdur75648/CogAgent
 cd CogAgent

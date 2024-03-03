@@ -9,4 +9,6 @@ examples/*grounding.png
 archive*
 hostfile
 runs/
+model/
+.deepspeed_env
 *.idea/
