@@ -2,7 +2,7 @@
 # export PATH=/usr/local/cuda/bin:$PATH
 # export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
-NUM_GPUS_PER_WORKER=4
+NUM_GPUS_PER_WORKER=1
 MP_SIZE=1
 
 script_path=$(realpath $0)
@@ -20,8 +20,6 @@ VERSION="vqa"
 
 MODEL_ARGS="--from_pretrained $MODEL_TYPE \
     --max_length 1024 \
-    --lora_rank 50 \
-    --use_lora \
     --local_tokenizer lmsys/vicuna-7b-v1.5 \
     --version $VERSION"
 # TIPS: max_length include low-resolution image sequence (which has 256 tokens) 
