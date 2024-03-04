@@ -23,10 +23,9 @@ cd CogAgent
 pip install --upgrade pip
 pip install -r requirements.txt
 python -m spacy download en_core_web_sm
-mkdir model
-cd model
-wget https://huggingface.co/THUDM/CogAgent/resolve/main/cogagent-vqa.zip?download=true -O cogagent-vqa.zip
-unzip cogagent-vqa.zip
+cd model/cogagent-vqa/1/
+wget https://huggingface.co/abdur75648/CogAgent-VQA/resolve/main/mp_rank_00_model_states.pt?download=true -O mp_rank_00_model_states.pt
+cd ../../../
 cd ../finetune_demo
 bash finetune_cogagent_lora.sh
 ```
