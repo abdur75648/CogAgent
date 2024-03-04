@@ -21,8 +21,14 @@ cd CogAgent
 3. Install the required packages
 ```bash
 pip install --upgrade pip
+pip install torch==2.2.0+cu118 torchvision==0.17.0+cu118 --index-url https://download.pytorch.org/whl/cu118
 pip install -r requirements.txt
 python -m spacy download en_core_web_sm
+unzip apex.zip && cd apex
+pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" ./
+tar -xvzf SwissArmyTransformer-0.4.11.tar.gz
+cd SwissArmyTransformer-0.4.11
+python setup.py develop
 cd model/cogagent-vqa/1/
 wget https://huggingface.co/abdur75648/CogAgent-VQA/resolve/main/mp_rank_00_model_states.pt?download=true -O mp_rank_00_model_states.pt
 cd ../../../
