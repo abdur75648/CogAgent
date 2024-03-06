@@ -2,14 +2,11 @@
 
 ## Setup
 
-***Setting Up The RunPod Environment***
+***Setting Up The RunPod Environment*** (Template `2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04`)
 
 1. Basic Installations
 ```bash
-apt-get update
-apt-get install zip unzip
-apt-get install git-lfs
-git lfs install
+apt-get update && apt-get install zip unzip vim && apt-get install git-lfs && git lfs install
 ```
 
 2. Clone this repository and navigate to CogAgent folder
@@ -21,18 +18,14 @@ cd CogAgent
 3. Install the required packages
 ```bash
 pip install --upgrade pip
-pip install torch==2.2.0+cu118 torchvision==0.17.0+cu118 --index-url https://download.pytorch.org/whl/cu118
-pip install -r requirements.txt
-python -m spacy download en_core_web_sm
-unzip apex.zip && cd apex
-pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" ./
-tar -xvzf SwissArmyTransformer-0.4.11.tar.gz
+pip install -r requirements.txt && python -m spacy download en_core_web_sm
+unzip apex.zip && cd apex && pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" ./
 cd SwissArmyTransformer-0.4.11
-python setup.py develop
+pip install -e .
 cd model/cogagent-vqa/1/
 wget https://huggingface.co/abdur75648/CogAgent-VQA/resolve/main/mp_rank_00_model_states.pt?download=true -O mp_rank_00_model_states.pt
 cd ../../../
-cd ../finetune_demo
+cd finetune_demo
 bash finetune_cogagent_lora.sh
 ```
 
