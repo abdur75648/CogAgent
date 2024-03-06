@@ -16,7 +16,11 @@ runs/
 **/.ipynb_checkpoints/
 **/build
 model/cogagent-vqa/1/mp_rank_00_model_states.pt
-*.pt
-*.lock
-*.egg-info/
 apex/*
+*.pth
+*.pt
+*.bin
+*.h5
+*.ckpt
+*.log
+*.lock
