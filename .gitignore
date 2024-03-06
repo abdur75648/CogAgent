@@ -1,4 +1,6 @@
 .hypothesis/
+__MACOSX/
+**/__MACOSX/
 __pycache__
 **/__pycache__/
 output.png
