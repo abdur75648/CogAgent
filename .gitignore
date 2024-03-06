@@ -1,6 +1,7 @@
 .hypothesis/
 __pycache__
 **/__pycache__/
+**/*.pyc
 output.png
 fewshot-data/
 checkpoints/
@@ -14,12 +15,8 @@ runs/
 .ipynb_checkpoints/
 **/.ipynb_checkpoints/
 **/build
-*.egg
-*.so
-*.idea/
 model/cogagent-vqa/1/mp_rank_00_model_states.pt
 *.pt
 *.lock
 *.egg-info/
-SwissArmyTransformer-0.4.11/SwissArmyTransformer.egg-info/
 apex/*
