@@ -7,6 +7,33 @@ from sat.mpu.layers import ColumnParallelLinear, RowParallelLinear
 from sat.mpu.utils import split_tensor_along_last_dim
 from sat import mpu
 
+from .GroundingDINO.groundingdino import build_groundingdino
+# from mmcv.gpt4roi.models.layers import MLVLROIQueryModule
+
+class GroundingMixin(BaseMixin):
+    def __init__(self, vision_branch_args, precision='fp16'):
+        super().__init__()
+        self.visual_grounding_model, self.criterion_grounding = build_groundingdino(vision_branch_args)
+        if precision == "bf16":
+            self.visual_grounding_model.to(device='cuda', dtype=torch.bfloat16)
+        elif precision == 'fp16':
+            self.visual_grounding_model.to(device='cuda', dtype=torch.half)
+        else:
+            self.visual_grounding_model.to(device='cuda', dtype=torch.float32)
+        
+        # self.spi_module = MLVLROIQueryModule(embed_dims=1024, out_dims=5120, num_levels=4)
+    
+    def get_visual_embs(self, samples):
+        with torch.no_grad():
+            features, poss = self.visual_grounding_model.forward_backbone(samples)
+        return features, poss
+
+    def forward(self, hidden_states, mask, **kw_args):
+        raise NotImplementedError
+
+    def copy_param(self):
+        self.groundingdino.copy_param()
+
 
 class LlamaVisionExpertFCMixin(BaseMixin):
     def __init__(self, in_features, hidden_features, num_layers=32, num_vision_layers=0, vision_layer_range=None,

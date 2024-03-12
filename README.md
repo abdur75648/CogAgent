@@ -22,6 +22,13 @@ pip install -r requirements.txt && python -m spacy download en_core_web_sm
 unzip apex.zip && cd apex && pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" ./
 cd SwissArmyTransformer-0.4.11
 pip install -e .
+cd ../utils/models
+unzip mmcv-1.4.7.zip
+cd mmcv-1.4.7/
+MMCV_WITH_OPS=1 pip install -e .
+cd ../model/GroundingDINO/ops
+python setup.py build install
+cd ../../../../
 cd model/cogagent-vqa/1/
 wget https://huggingface.co/abdur75648/CogAgent-VQA/resolve/main/mp_rank_00_model_states.pt?download=true -O mp_rank_00_model_states.pt
 cd ../../../

@@ -1,4 +1,4 @@
-import os
+import os,re, cv2
 import logging
 import random
 import logging
@@ -102,12 +102,29 @@ class ItemDataset(Dataset):
             print_rank0(e, level=logging.WARNING)
             return {}
         img_dict = self.process_img(img)
+        
         # text
         label = data['Answer']
         prompt = data['Question']
+        
+        bbox_gt = re.findall(r"\[.*?\]", label)
+        assert len(bbox_gt)==1
+        assert len(re.findall(r"\[.*?\]", prompt))==0
+        right_part = label.split(bbox_gt[0])[1].strip()
+        left_part = label.split(bbox_gt[0])[0].strip()
+        label = left_part + " " + right_part
+        bbox_gt = bbox_gt[0].replace("[", "").replace("]", "")
+        if "," in bbox_gt:
+            bbox_gt = bbox_gt.split(",")
+        else:
+            bbox_gt = bbox_gt.split(" ")
+        img = cv2.imread(data["imagePath"])
+        bbox_gt = [float(x) for x in bbox_gt]
+        bbox_gt = [int(bbox_gt[0]*img.shape[1]), int(bbox_gt[1]*img.shape[0]), int(bbox_gt[2]*img.shape[1]), int(bbox_gt[3]*img.shape[0])]
 
         uni_key = str(uuid.uuid4())
         text_dict = self.process_text(label, prompt)
+        text_dict.update({"bboxes_gt_list": [bbox_gt]})
         if text_dict is None:
             print_rank0(f"Process text failed. Please check the max_target_length & max_source_length.\n The data is {data}", level=logging.WARNING)
             return {}
