@@ -1,4 +1,5 @@
 import os
+import json
 import torch
 import argparse
 from functools import partial
@@ -266,22 +267,40 @@ if __name__ == '__main__':
     py_parser = FineTuneTrainCogAgentModel.add_model_specific_args(py_parser)
     known, args_list = py_parser.parse_known_args()
     args = get_args(args_list)
+    
+    ####### Added As A Part Of The Fix ########
+    with open('../model/cogagent-vqa/model_config.json', 'r') as f:
+        missing_args = json.load(f)
+    known.eva_args = missing_args['eva_args']
+    
     args = argparse.Namespace(**vars(args), **vars(known))
+    
+    print("args:\n", args, flush=True)
     if args.use_qlora:
         args.device = 'cpu'
         
     from utils.utils import llama2_tokenizer
     tokenizer = llama2_tokenizer(args.local_tokenizer, signal_type=args.version)
+    # print the number of tokens
+    # print(tokenizer.vocab_size) # 32000
+    # print(tokenizer.pad_token_id, tokenizer.convert_ids_to_tokens(tokenizer.pad_token_id)) # 0, <unk>
+    # print(tokenizer.bos_token_id, tokenizer.convert_ids_to_tokens(tokenizer.bos_token_id)) # 1, <s>
+    # print(tokenizer.eos_token_id, tokenizer.convert_ids_to_tokens(tokenizer.eos_token_id)) # 2, </s>
+    # print(tokenizer.unk_token_id, tokenizer.convert_ids_to_tokens(tokenizer.unk_token_id)) # 0, <unk>
     
-    tokenizer.add_tokens("[VG]")
-    args.vg_token_idx = (tokenizer("[VG]", add_special_tokens=False).input_ids)[0]
+    # Add "[VG]" token to the tokenizer
+    tokenizer.add_special_tokens({'additional_special_tokens': ["[VG]"]})
+    # print(tokenizer.vocab_size) # 32000 because special tokens are not counted
+    # print(tokenizer.convert_tokens_to_ids("[VG]")) # 32000
+    args.vg_token_idx = tokenizer.convert_tokens_to_ids("[VG]")
     assert args.vg_token_idx == tokenizer.convert_tokens_to_ids("[VG]")
     
     image_processor = get_image_processor(args.eva_args["image_size"][0])
     cross_image_processor = get_image_processor(args.cross_image_pix)
     text_processor = llama2_text_processor(tokenizer, args.max_length, args.image_length)
 
-    model, args = FineTuneTrainCogAgentModel.from_pretrained(args.from_pretrained, args, overwrite_args={'model_parallel_size': args.model_parallel_size} if args.model_parallel_size != 1 else {})
+    model, args = FineTuneTrainCogAgentModel.from_pretrained(args.from_pretrained, args,build_only=True, overwrite_args={'model_parallel_size': args.model_parallel_size} if args.model_parallel_size != 1 else {})
+    # model, args = FineTuneTrainCogAgentModel.from_pretrained(args.from_pretrained, args, overwrite_args={'model_parallel_size': args.model_parallel_size} if args.model_parallel_size != 1 else {})
     if args.use_ptuning: # TODO: wait for SAT updating
         model.add_mixin("ptuning", PTuningV2Mixin(args.num_layers, args.hidden_size // args.num_attention_heads, args.num_attention_heads, args.pre_seq_len))
 

@@ -1,7 +1,7 @@
 setup.py
-/home/chemical/dual/ch7190150/ChatterBox/model/GroundingDINO/ops/src/vision.cpp
-/home/chemical/dual/ch7190150/ChatterBox/model/GroundingDINO/ops/src/cpu/ms_deform_attn_cpu.cpp
-/home/chemical/dual/ch7190150/ChatterBox/model/GroundingDINO/ops/src/cuda/ms_deform_attn_cuda.cu
+/workspace/CogAgent/utils/models/GroundingDINO/ops/src/vision.cpp
+/workspace/CogAgent/utils/models/GroundingDINO/ops/src/cpu/ms_deform_attn_cpu.cpp
+/workspace/CogAgent/utils/models/GroundingDINO/ops/src/cuda/ms_deform_attn_cuda.cu
 MultiScaleDeformableAttention.egg-info/PKG-INFO
 MultiScaleDeformableAttention.egg-info/SOURCES.txt
 MultiScaleDeformableAttention.egg-info/dependency_links.txt

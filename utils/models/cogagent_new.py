@@ -16,8 +16,7 @@ MODEL_URLS["cogagent-chat"] = "r2://cogagent-chat.zip"
 MODEL_URLS["cogagent-vqa"] = "r2://cogagent-vqa.zip"
 
 def load_vision_branch_args():
-            vision_branch_args = argparse.Namespace()
-            # vision_branch_args.world_size = -1
+            from args_of_build_grounding_dino import args as vision_branch_args
             return vision_branch_args
 
 class GLU(nn.Module):
@@ -194,6 +193,7 @@ class CogAgentModelNew(LLaMAModel):
         return super().add_model_specific_args(parser)
 
     def forward(self, input_ids, vision_expert_mask, image_embed_mask, **kwargs):
+        kwargs['output_hidden_states'] = True
         
         # Creating VG mask
         vg_token_mask = input_ids == self.vg_token_idx
@@ -280,7 +280,6 @@ class CogAgentModelNew(LLaMAModel):
 
 class FineTuneTrainCogAgentModelNew(CogAgentModelNew):
     def __init__(self, args, transformer=None, parallel_output=True, **kw_args):
-        kw_args['output_hidden_states'] = True
         super().__init__(args, transformer=transformer, parallel_output=parallel_output, **kw_args)
         self.args = args
         # If you want to use model parallel with a mp_size=1 checkpoint, and meanwhile you also want to use lora,

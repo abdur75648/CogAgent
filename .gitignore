@@ -3,6 +3,10 @@ __MACOSX/
 **/__MACOSX/
 __pycache__
 **/__pycache__/
+finetune_demo/.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+**/*.egg-info/
+**/*.egg
 output.png
 fewshot-data/
 checkpoints/
@@ -17,6 +21,7 @@ runs/
 **/.ipynb_checkpoints/
 **/build
 model/cogagent-vqa/1/mp_rank_00_model_states.pt
+utils/models/mmcv-1.4.7/
 apex/*
 *.pth
 *.pt

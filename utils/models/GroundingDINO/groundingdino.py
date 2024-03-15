@@ -33,7 +33,7 @@ from groundingdino.util.misc import (
     nested_tensor_from_tensor_list,
 )
 
-from ..registry import MODULE_BUILD_FUNCS
+from groundingdino.util.registry import MODULE_BUILD_FUNCS
 from .backbone import build_backbone
 from .bertwarper import generate_masks_with_special_tokens_and_transfer_map
 from .transformer import build_transformer
@@ -648,11 +648,9 @@ def build_groundingdino(args):
     device = torch.device(args.device)
     backbone = build_backbone(args)
     transformer = build_transformer(args)
-
     dn_labelbook_size = args.dn_labelbook_size
     dec_pred_bbox_embed_share = args.dec_pred_bbox_embed_share
     sub_sentence_present = args.sub_sentence_present
-
     model = GroundingDINO(
         backbone,
         transformer,
@@ -673,27 +671,19 @@ def build_groundingdino(args):
         dn_labelbook_size=dn_labelbook_size,
         sub_sentence_present=sub_sentence_present,
     )
-
-
-
     matcher = build_matcher(args)
-
     # prepare weight dict
     weight_dict = {'loss_ce': args.cls_loss_coef, 'loss_bbox': args.bbox_loss_coef}
     weight_dict['loss_giou'] = args.giou_loss_coef
     clean_weight_dict_wo_dn = copy.deepcopy(weight_dict)
 
-    
-
     clean_weight_dict = copy.deepcopy(weight_dict)
-
     # TODO this is a hack
     if args.aux_loss:
         aux_weight_dict = {}
         for i in range(args.dec_layers - 1):
             aux_weight_dict.update({k + f'_{i}': v for k, v in clean_weight_dict.items()})
         weight_dict.update(aux_weight_dict)
-
     if args.two_stage_type != 'no':
         interm_weight_dict = {}
         try:
@@ -711,15 +701,12 @@ def build_groundingdino(args):
             interm_loss_coef = 1.0
         interm_weight_dict.update({k + f'_interm': v * interm_loss_coef * _coeff_weight_dict[k] for k, v in clean_weight_dict_wo_dn.items()})
         weight_dict.update(interm_weight_dict)
-
     # losses = ['labels', 'boxes', 'cardinality']
     losses = ['labels', 'boxes']
-
     criterion = SetCriterion(matcher=matcher, weight_dict=weight_dict,
                              focal_alpha=args.focal_alpha, focal_gamma=args.focal_gamma,losses=losses
                              )
     criterion.to(device)
-
     return model, criterion
 
 def create_positive_map(tokenized, tokens_positive,cat_list,caption):
