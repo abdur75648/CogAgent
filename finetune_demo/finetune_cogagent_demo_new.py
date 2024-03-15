@@ -193,7 +193,8 @@ def forward_step_eval(data_iterator, model, args, timers):
     # Get the batch.
     timers('batch generator').start()
     data_b = get_batch(
-        data_iterator, args, timers)
+        data_iterator, args,
+        timers)
     timers('batch generator').stop()
 
     context_len = int(data_b['context_length'][0])
@@ -300,6 +301,10 @@ if __name__ == '__main__':
     text_processor = llama2_text_processor(tokenizer, args.max_length, args.image_length)
 
     model, args = FineTuneTrainCogAgentModel.from_pretrained(args.from_pretrained, args,build_only=True, overwrite_args={'model_parallel_size': args.model_parallel_size} if args.model_parallel_size != 1 else {})
+    
+    print("Model Created", flush=True)
+    print("Model Size: ", sum(p.numel() for p in model.parameters())/1e6, "M", flush=True)
+    
     # model, args = FineTuneTrainCogAgentModel.from_pretrained(args.from_pretrained, args, overwrite_args={'model_parallel_size': args.model_parallel_size} if args.model_parallel_size != 1 else {})
     if args.use_ptuning: # TODO: wait for SAT updating
         model.add_mixin("ptuning", PTuningV2Mixin(args.num_layers, args.hidden_size // args.num_attention_heads, args.num_attention_heads, args.pre_seq_len))

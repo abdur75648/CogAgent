@@ -113,7 +113,7 @@ class ImageMixin(BaseMixin):
         super().__init__()
         vit_args = override_dist_dtype_device_args(args, args.eva_args)
         self.vit_model = EVA2CLIPModel(EVA2CLIPModel.get_args(**vars(vit_args)))
-        self.in_features = 1792
+        self.in_features = args.eva_args['hidden_size']
         self.linear_proj = GLU(args, self.in_features)
         self.image_length = args.image_length
         self.boi = nn.Parameter(torch.zeros(1, 1, args.hidden_size))
@@ -126,7 +126,7 @@ class ImageMixin(BaseMixin):
         #     torch.from_numpy(get_2d_sincos_pos_embed(1792, 16)).float()
         # )
         self.pos_embed = nn.Parameter(
-            torch.zeros(self.image_length, 1792)
+            torch.zeros(self.image_length, args.eva_args['hidden_size'])
         )
 
     def word_embedding_forward(self, input_ids, output_cross_layer, **kw_args):
