@@ -168,8 +168,9 @@ class WindowAttention(nn.Module):
 
         attn = self.attn_drop(attn)
 
+        v = v.to(attn.dtype)
         x = (attn @ v).transpose(1, 2).reshape(B_, N, C)
-        x = self.proj(x)
+        x = self.proj(x.to(self.proj.weight.dtype))
         x = self.proj_drop(x)
         return x
 

@@ -262,7 +262,10 @@ if __name__ == '__main__':
     if args.use_qlora:
         args.device = 'cpu'
 
-    model, args = FineTuneTrainCogAgentModel.from_pretrained(args.from_pretrained, args, overwrite_args={'model_parallel_size': args.model_parallel_size} if args.model_parallel_size != 1 else {})
+    print("\n"*5)
+    print("Using build_only=True for building model...")
+    print("\n"*5)
+    model, args = FineTuneTrainCogAgentModel.from_pretrained(args.from_pretrained, args, build_only=True, overwrite_args={'model_parallel_size': args.model_parallel_size} if args.model_parallel_size != 1 else {})
     if args.use_ptuning: # TODO: wait for SAT updating
         model.add_mixin("ptuning", PTuningV2Mixin(args.num_layers, args.hidden_size // args.num_attention_heads, args.num_attention_heads, args.pre_seq_len))
 

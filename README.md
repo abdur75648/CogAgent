@@ -22,11 +22,8 @@ pip install -r requirements.txt && python -m spacy download en_core_web_sm
 unzip apex.zip && cd apex && pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" ./
 cd SwissArmyTransformer-0.4.11
 pip install -e .
-cd ../utils/models
-unzip mmcv-1.4.7.zip
-cd mmcv-1.4.7/
-MMCV_WITH_OPS=1 pip install -e .
-cd ../model/GroundingDINO/ops
+cd ../utils/models/GroundingDINO/ops
+pip install mmcv-full==1.7.2 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html
 python setup.py build install
 cd ../../../../
 cd model/cogagent-vqa/1/

@@ -117,7 +117,7 @@ class ImageMixin(BaseMixin):
         super().__init__()
         vit_args = override_dist_dtype_device_args(args, args.eva_args)
         self.vit_model = EVA2CLIPModel(EVA2CLIPModel.get_args(**vars(vit_args)))
-        self.in_features = 1792
+        self.in_features = args.eva_args['hidden_size']
         self.linear_proj = GLU(args, self.in_features)
         self.image_length = args.image_length
         self.boi = nn.Parameter(torch.zeros(1, 1, args.hidden_size))
@@ -130,7 +130,7 @@ class ImageMixin(BaseMixin):
         #     torch.from_numpy(get_2d_sincos_pos_embed(1792, 16)).float()
         # )
         self.pos_embed = nn.Parameter(
-            torch.zeros(self.image_length, 1792)
+            torch.zeros(self.image_length, args.eva_args['hidden_size'])
         )
 
     def word_embedding_forward(self, input_ids, output_cross_layer, **kw_args):
@@ -193,17 +193,58 @@ class CogAgentModelNew(LLaMAModel):
         return super().add_model_specific_args(parser)
 
     def forward(self, input_ids, vision_expert_mask, image_embed_mask, **kwargs):
+        # print(kwargs.keys())
+        # dict_keys(['gndimg', 'vision_image', 'cross_image', 'position_ids',
+        # 'attention_mask', 'context_length', 'image_rope_mask', 'vision_input_ids',
+        # 'vision_attention_mask', 'cross_input_ids', 'cross_attention_mask', 'ratios',
+        # 'image_position', 'bboxes_gt_list', 'question_id', 'vision_position_ids',
+        # 'cross_position_ids'])
+                                               
+        # Input_ids Shape:  torch.Size([1, 1024])
+        # Vision Expert Mask Shape:  torch.Size([1, 1024])
+        # Image Embed Mask Shape:  torch.Size([1, 1024])
+        # Position IDs Shape:  torch.Size([1, 1024])
+        # Attention Mask Shape:  torch.Size([1, 1, 1024, 1024])
+        # Context Length Shape:  torch.Size([1])
+        # Image Position Shape:  torch.Size([1])
+        # Image Rope Mask Shape:  torch.Size([1, 1024])
+        # BBoxes GT List Size:  1
+        # Vision Input IDs Shape:  torch.Size([1, 1])
+        # Vision Attention Mask Shape:  torch.Size([1, 1])
+        # Cross Input IDs Shape:  torch.Size([1, 1])
+        # Cross Attention Mask Shape:  torch.Size([1, 1])
+        # Vision Image Shape:  torch.Size([1, 3, 224, 224])
+        # Cross Image Shape:  torch.Size([1, 3, 1120, 1120])
+        # Question ID:  3409ccea-6965-4b63-af22-cccec57c7fce
+        # Vision Position IDs:  None
+        # Cross Position IDs:  None
+        
         kwargs['output_hidden_states'] = True
         
         # Creating VG mask
         vg_token_mask = input_ids == self.vg_token_idx
         
-        images = kwargs['cross'] # kwargs['vision']
+        images = kwargs['gndimg']
+        images = images.unsqueeze(0)
+        # print("Images Shape: ", images.shape)
         if isinstance(images, (list, torch.Tensor)):
             samples = nested_tensor_from_tensor_list(images)
         else:
             samples = images
-        features, poss = self.get_mixin('grounding').get_visual_embs(images)
+        # Convert to bfloat16
+        samples.tensors = samples.tensors.to(dtype=torch.bfloat16)
+        samples.mask = samples.mask.to(dtype=torch.bool)
+        
+        # print("Samples.tensors: ", samples.tensors.shape) # Expected torch.Size([1, 3, 512, 512])
+        # print("Samples.mask: ", samples.mask.shape) # Expected torch.Size([1, 512, 512])
+        features, poss = self.get_mixin('grounding').get_visual_embs(samples)
+        
+        # print("len(features): ", len(features)) # 3
+        # POTENTIAL ISSUE BELOW (May Be) -> Extected features Shapes torch.Size([1, 256, 64/32/16, 64/32/16])
+        # print("Features: ", features[0].tensors.shape) # [1, 256, 64, 64], [1, 512, 32, 32], [1, 1024, 16, 16]
+        # print("Features.mask: ", features[0].mask.shape) # torch.Size([1, 64, 64])
+        # print("len(poss): ", len(poss)) # 3
+        # print("poss: ", poss[0].shape, poss[1].shape, poss[2].shape) # torch.Size([1, 256, 64/32/16, 64/32/16])
         
         cross_inputs = {}
         for k in kwargs:
@@ -225,19 +266,30 @@ class CogAgentModelNew(LLaMAModel):
         # Get last hidden state from llm_output
         last_hidden_state = llm_output[-1]['hidden_states']
         last_hidden_state_projected = self.grounding_fc(last_hidden_state)
+        # print("last_hidden_state: ", last_hidden_state.shape) # torch.Size([1, 1024, 256])
+        # print("last_hidden_state_projected: ", last_hidden_state_projected.shape) # torch.Size([1, 1024, 256])
+        # print("vg_token_mask: ", vg_token_mask.shape) # torch.Size([1, 1024])
+        # print("Unique values in vg_token_mask: ", np.unique(vg_token_mask.cpu().numpy())) # [False  True]
+        # print("Number of 1s in vg_token_mask: ", vg_token_mask.int().sum()) # 1
         pred_embeddings =  last_hidden_state_projected[vg_token_mask]
         initial_pred_embeddings = pred_embeddings
         
-        # vg_token_counts = vg_token_mask.int().sum(-1)
-        # vg_token_offset = vg_token_counts.cumsum(-1)
-        # vg_token_offset = torch.cat([torch.zeros(1).long().cuda(), vg_token_offset], dim=0)
-        # vg_token_offset = vg_token_offset[kwargs['offset']]
+        vg_token_counts = vg_token_mask.int().sum(-1)
+        vg_token_offset = vg_token_counts.cumsum(-1)
+        vg_token_offset = torch.cat([torch.zeros(1).long().cuda(), vg_token_offset], dim=0)
         
-        # pred_embeddings_ = []
-        # for i in range(len(vg_token_offset) - 1):
-        #     start_i, end_i = vg_token_offset[i], vg_token_offset[i + 1]
-        #     pred_embeddings_.append(pred_embeddings[start_i:end_i])
-        # pred_embeddings = pred_embeddings_
+        # print("Offset: ", kwargs['offset']) # tensor([0, 1])
+        vg_token_offset = vg_token_offset[kwargs['offset']]
+        # print("vg_token_offset: ", vg_token_offset) # tensor([0, 1])
+        
+        pred_embeddings_ = []
+        for i in range(len(vg_token_offset) - 1):
+            start_i, end_i = vg_token_offset[i], vg_token_offset[i + 1]
+            pred_embeddings_.append(pred_embeddings[start_i:end_i])
+        pred_embeddings = pred_embeddings_
+        # print("pred_embeddings: ", len(pred_embeddings)) # 1
+        # print("pred_embeddings[0]: ", pred_embeddings[0].shape) # torch.Size([1, 256])
+        
         
         target = []
         gt_ids = []
@@ -261,14 +313,32 @@ class CogAgentModelNew(LLaMAModel):
                 )
             )
         
+        # print("Target: ", target) # [{'boxes': tensor([[0.6243, 0.0892, 0.0247, 0.0820], [0.4349, 0.1022, 0.3568, 0.2044]]), 'labels': tensor([0])}]
+        # print("gt_ids: ", gt_ids)  # [0]
+        # print("sample.tensor: ", sample.tensors.shape) # torch.Size([1, 3, 512, 512])
+        # print("sample.mask: ", sample.mask.shape) # torch.Size([1, 512, 512])
+        # print("feature.tensor: ", feature[0].tensors.shape) # torch.Size([1, 256, 64, 64])
+        # print("feature.mask: ", feature[0].mask.shape) # torch.Size([1, 64, 64])
+        
         pos = []
         for p in poss:
             pos.append(p[gt_ids])
-            bbox_outputs = self.get_mixin('grounding').visual_grounding_model.forward_enc_dec(sample, feature, pos, query_embedding=initial_pred_embeddings[gt_ids].unsqueeze(1))
-            # loss_dict = self.get_mixin('grounding').criterion_grounding(bbox_outputs, target, initial_pred_embeddings[gt_ids].unsqueeze(1))
-            # weight_dict = self.get_mixin('grounding').criterion_grounding.weight_dict
-            # vg_loss = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
         
+        # print("pos: ", len(pos)) # 3
+        # print("pos[0,1,2]: ", pos[0].shape, pos[1].shape, pos[2].shape) # torch.Size([1, 256, 64/32/16, 64/32/16])
+        
+        # sample.tensors = sample.tensors.to(dtype=torch.float32)
+        # for i in range(len(feature)):
+        #     feature[i].tensors = feature[i].tensors.to(dtype=torch.float32)
+        # for i in range(len(pos)):
+        #     pos[i] = pos[i].to(dtype=torch.float32)
+        # initial_pred_embeddings = initial_pred_embeddings.to(dtype=torch.float32)
+        
+        bbox_outputs = self.get_mixin('grounding').visual_grounding_model.forward_enc_dec(sample, feature, pos, query_embedding=initial_pred_embeddings[gt_ids].unsqueeze(1))
+        # loss_dict = self.get_mixin('grounding').criterion_grounding(bbox_outputs, target, initial_pred_embeddings[gt_ids].unsqueeze(1))
+        # weight_dict = self.get_mixin('grounding').criterion_grounding.weight_dict
+        # vg_loss = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
+    
         bbox_outputs_dict = {}
         bbox_outputs_dict['bbox_outputs'] = bbox_outputs
         bbox_outputs_dict['gt_ids'] = gt_ids

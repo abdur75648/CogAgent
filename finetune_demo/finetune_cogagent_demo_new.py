@@ -10,7 +10,7 @@ from sat import mpu, get_args, get_tokenizer
 from sat.training.deepspeed_training import training_main
 from sat.helpers import print_rank0
 from utils.models import FineTuneTrainCogAgentModelNew as FineTuneTrainCogAgentModel
-from utils.utils import llama2_text_processor, llama2_text_processor_inference, get_image_processor
+from utils.utils import llama2_text_processor, llama2_text_processor_inference, get_image_processor, get_grounding_image_processor
 
 def disable_untrainable_params(self):
     total_trainable = 0
@@ -61,6 +61,8 @@ def data_collator(examples, cross_image_processor=None):
     # Convert all lists and numpy arrays in examples to tensors
     for example in examples:
         for key, value in example.items():
+            if isinstance(value, list):
+                continue
             example[key] = to_tensor(value)
 
     # Extract and concatenate attributes from examples
@@ -91,6 +93,10 @@ def data_collator(examples, cross_image_processor=None):
     
     # Merge img_args into model_args
     model_args.update(img_args)
+    
+    # Add 'offset' key to model_args
+    model_args['offset'] = torch.arange(0, model_args['input_ids'].size(0)+1, device=model_args['input_ids'].device)
+    
     return model_args
 
 
@@ -250,8 +256,8 @@ def forward_step(data_iterator, model, args, timers):
     return [llm_loss,gnd_loss], {'llm_loss': llm_loss, 'gnd_loss': gnd_loss}
 
 from utils.utils import ItemDataset
-def create_dataset_function(image_processor, text_processor, cross_image_processor, path, args):
-    dataset = ItemDataset(image_processor, text_processor, args, path, cross_image_processor=cross_image_processor)
+def create_dataset_function(image_processor, text_processor, cross_image_processor, grounding_image_processor, path, args):
+    dataset = ItemDataset(image_processor, text_processor, args, path, cross_image_processor=cross_image_processor, grounding_image_processor = grounding_image_processor)
     return dataset
 
 from sat.model.finetune.lora2 import LoraMixin
@@ -272,6 +278,7 @@ if __name__ == '__main__':
     ####### Added As A Part Of The Fix ########
     with open('../model/cogagent-vqa/model_config.json', 'r') as f:
         missing_args = json.load(f)
+    known.gnd_image_pix = missing_args['gnd_image_pix']
     known.eva_args = missing_args['eva_args']
     
     args = argparse.Namespace(**vars(args), **vars(known))
@@ -298,6 +305,7 @@ if __name__ == '__main__':
     
     image_processor = get_image_processor(args.eva_args["image_size"][0])
     cross_image_processor = get_image_processor(args.cross_image_pix)
+    grounding_image_processor = get_grounding_image_processor(args.gnd_image_pix)
     text_processor = llama2_text_processor(tokenizer, args.max_length, args.image_length)
 
     model, args = FineTuneTrainCogAgentModel.from_pretrained(args.from_pretrained, args,build_only=True, overwrite_args={'model_parallel_size': args.model_parallel_size} if args.model_parallel_size != 1 else {})
@@ -318,7 +326,7 @@ if __name__ == '__main__':
     if args.use_qlora and torch.cuda.is_available():
         model = model.to('cuda')
 
-    model = training_main(args, model_cls=model, forward_step_function=forward_step, create_dataset_function=partial(create_dataset_function, image_processor, text_processor, cross_image_processor), collate_fn=partial(data_collator, cross_image_processor=cross_image_processor), forward_step_eval=forward_step_eval)
+    model = training_main(args, model_cls=model, forward_step_function=forward_step, create_dataset_function=partial(create_dataset_function, image_processor, text_processor, cross_image_processor,grounding_image_processor), collate_fn=partial(data_collator, cross_image_processor=cross_image_processor), forward_step_eval=forward_step_eval)
     if args.use_lora:
         model.get_mixin("lora").merge_lora()
         model.get_mixin("eva").vit_model.get_mixin("lora").merge_lora()

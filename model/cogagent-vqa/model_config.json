@@ -20,6 +20,7 @@
     "encoder_args": {},
     "image_length": 256,
     "cross_image_pix": 1120,
+    "gnd_image_pix": 512,
     "eva_args": {
         "model_class": "EVA2CLIPModel",
         "num_layers": 1,
