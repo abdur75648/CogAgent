@@ -330,7 +330,7 @@ class MultiScaleDeformableAttention(nn.Module):
     
         if torch.cuda.is_available() and value.is_cuda:
             halffloat = False
-            if value.dtype == torch.float16:
+            if value.dtype == torch.float16 or value.dtype == torch.bfloat16:
                 halffloat = True
                 value = value.float()
                 sampling_locations = sampling_locations.float()
@@ -352,6 +352,7 @@ class MultiScaleDeformableAttention(nn.Module):
                 value, spatial_shapes, sampling_locations, attention_weights
             )
 
+        output = output.to(self.output_proj.weight.dtype)
         output = self.output_proj(output)
 
         if not self.batch_first:

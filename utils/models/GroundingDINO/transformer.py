@@ -681,7 +681,7 @@ class TransformerDecoder(nn.Module):
                 reference_points_input = reference_points[:, :, None] * valid_ratios[None, :]
             query_sine_embed = gen_sineembed_for_position(
                 reference_points_input[:, :, 0, :]
-            )  # nq, bs, 256*2
+            ) # nq, bs, 256*2
 
             # conditional query
             raw_query_pos = self.ref_point_head(query_sine_embed)  # nq, bs, 256
@@ -733,7 +733,9 @@ class TransformerDecoder(nn.Module):
                 reference_points = new_reference_points.detach()
                 # if layer_id != self.num_layers - 1:
                 ref_points.append(new_reference_points)
-
+            
+            output = output.half()
+            self.norm.half()
             intermediate.append(self.norm(output))
 
         # import pdb;pdb.set_trace()
@@ -791,6 +793,7 @@ class DeformableTransformerEncoderLayer(nn.Module):
     ):
         # self attention
         # import ipdb; ipdb.set_trace()
+        # print("src.dtype inside GroundingDino.transformer.py", src.dtype) # torch.bfloat16
         src2 = self.self_attn(
             query=self.with_pos_embed(src, pos),
             reference_points=reference_points,
@@ -799,6 +802,7 @@ class DeformableTransformerEncoderLayer(nn.Module):
             level_start_index=level_start_index,
             key_padding_mask=key_padding_mask,
         )
+        # print("src2.dtype inside GroundingDino.transformer.py", src2.dtype) # torch.bfloat16
         src = src + self.dropout1(src2)
         src = self.norm1(src)
 
@@ -873,6 +877,9 @@ class DeformableTransformerDecoderLayer(nn.Module):
             # inter = self.activation(inter)
             # inter = self.dropout3(inter)
             # tgt2 = self.linear2(inter)
+            print(tgt.dtype)
+            print(self.linear1.weight.dtype)
+            tgt = tgt.to(self.linear1.weight.dtype)
             tgt2 = self.linear2(self.dropout3(self.activation(self.linear1(tgt))))
         tgt = tgt + self.dropout4(tgt2)
         tgt = self.norm3(tgt)
@@ -909,6 +916,9 @@ class DeformableTransformerDecoderLayer(nn.Module):
         if self.self_attn is not None:
             # import ipdb; ipdb.set_trace()
             q = k = self.with_pos_embed(tgt, tgt_query_pos)
+            tgt = tgt.to(self.self_attn.in_proj_weight.dtype)
+            q = q.to(tgt.dtype)
+            k = k.to(tgt.dtype)
             tgt2 = self.self_attn(q, k, tgt, attn_mask=self_attn_mask)[0]
             tgt = tgt + self.dropout2(tgt2)
             tgt = self.norm2(tgt)

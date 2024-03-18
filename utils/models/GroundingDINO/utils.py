@@ -180,6 +180,7 @@ class MLP(nn.Module):
         )
 
     def forward(self, x):
+        x = x.to(self.layers[0].weight.dtype)
         for i, layer in enumerate(self.layers):
             x = F.relu(layer(x)) if i < self.num_layers - 1 else layer(x)
         return x
@@ -260,7 +261,9 @@ class ContrastiveEmbed(nn.Module):
         # import pdb;pdb.set_trace()
         y = text_dict["encoded_text"]  #torch.Size([2, 195, 256])
         text_token_mask = text_dict["text_token_mask"]
-
+        
+        x = x.float()
+        y = y.float()
         res = x @ y.transpose(-1, -2)
         res.masked_fill_(~text_token_mask[:, None, :], float("-inf"))
         # 接着，对res进行掩码操作，将未使用的文本token（即padding的token）对应的得分置为负无穷float("-inf")。这是为了在计算相似度时，排除padding部分的影响。

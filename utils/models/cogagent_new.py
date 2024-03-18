@@ -327,6 +327,21 @@ class CogAgentModelNew(LLaMAModel):
         # print("pos: ", len(pos)) # 3
         # print("pos[0,1,2]: ", pos[0].shape, pos[1].shape, pos[2].shape) # torch.Size([1, 256, 64/32/16, 64/32/16])
         
+        sample.tensors = sample.tensors.to(dtype=torch.float32)
+        for i in range(len(feature)):
+            feature[i].tensors = feature[i].tensors.to(dtype=torch.float32)
+        for i in range(len(pos)):
+            pos[i] = pos[i].to(dtype=torch.float32)
+        initial_pred_embeddings = initial_pred_embeddings.to(dtype=torch.float32)
+        
+        # unique_dtypes = set()
+        # print("\n\ndtype of all params of visual_grounding_model: ")
+        # for name, param in self.get_mixin('grounding').visual_grounding_model.named_parameters():
+        #     # print(f"dtype of {name}: ", param.dtype)
+        #     unique_dtypes.add(param.dtype)
+        # print("unique_dtypes: ", unique_dtypes) # {torch.bfloat16}
+        
+        self.get_mixin('grounding').visual_grounding_model.float()
         bbox_outputs = self.get_mixin('grounding').visual_grounding_model.forward_enc_dec(sample, feature, pos, query_embedding=initial_pred_embeddings[gt_ids].unsqueeze(1))
         # loss_dict = self.get_mixin('grounding').criterion_grounding(bbox_outputs, target, initial_pred_embeddings[gt_ids].unsqueeze(1))
         # weight_dict = self.get_mixin('grounding').criterion_grounding.weight_dict
@@ -337,6 +352,13 @@ class CogAgentModelNew(LLaMAModel):
         bbox_outputs_dict['gt_ids'] = gt_ids
         bbox_outputs_dict['target'] = target
         bbox_outputs_dict['initial_pred_embeddings'] = initial_pred_embeddings
+        
+        print("\n"*5)
+        print(bbox_outputs)
+        print(bbox_outputs_dict)
+        print(llm_output[0])
+        exit()
+        print("\n"*5)
             
         return llm_output[0], bbox_outputs_dict
 

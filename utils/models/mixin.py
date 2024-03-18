@@ -14,12 +14,12 @@ class GroundingMixin(BaseMixin):
     def __init__(self, vision_branch_args, precision='fp16'):
         super().__init__()
         self.visual_grounding_model, self.criterion_grounding = build_groundingdino(vision_branch_args)
-        if precision == "bf16":
-            self.visual_grounding_model.to(device='cuda', dtype=torch.bfloat16)
-        elif precision == 'fp16':
-            self.visual_grounding_model.to(device='cuda', dtype=torch.half)
-        else:
-            self.visual_grounding_model.to(device='cuda', dtype=torch.float32)
+        # if precision == "bf16":
+        #     self.visual_grounding_model.to(device='cuda', dtype=torch.bfloat16)
+        # elif precision == 'fp16':
+        #     self.visual_grounding_model.to(device='cuda', dtype=torch.half)
+        # else:
+        #     self.visual_grounding_model.to(device='cuda', dtype=torch.float32)
         
         # self.spi_module = MLVLROIQueryModule(embed_dims=1024, out_dims=5120, num_levels=4)
     
