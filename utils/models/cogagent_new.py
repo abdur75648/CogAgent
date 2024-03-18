@@ -327,13 +327,6 @@ class CogAgentModelNew(LLaMAModel):
         # print("pos: ", len(pos)) # 3
         # print("pos[0,1,2]: ", pos[0].shape, pos[1].shape, pos[2].shape) # torch.Size([1, 256, 64/32/16, 64/32/16])
         
-        # sample.tensors = sample.tensors.to(dtype=torch.float32)
-        # for i in range(len(feature)):
-        #     feature[i].tensors = feature[i].tensors.to(dtype=torch.float32)
-        # for i in range(len(pos)):
-        #     pos[i] = pos[i].to(dtype=torch.float32)
-        # initial_pred_embeddings = initial_pred_embeddings.to(dtype=torch.float32)
-        
         bbox_outputs = self.get_mixin('grounding').visual_grounding_model.forward_enc_dec(sample, feature, pos, query_embedding=initial_pred_embeddings[gt_ids].unsqueeze(1))
         # loss_dict = self.get_mixin('grounding').criterion_grounding(bbox_outputs, target, initial_pred_embeddings[gt_ids].unsqueeze(1))
         # weight_dict = self.get_mixin('grounding').criterion_grounding.weight_dict
