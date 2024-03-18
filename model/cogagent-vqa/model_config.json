@@ -5,7 +5,7 @@
     "num_layers": 2,
     "hidden_size": 256,
     "num_attention_heads": 2,
-    "vocab_size": 32000,
+    "vocab_size": 32001, 
     "layernorm_order": "pre",
     "model_parallel_size": 1,
     "max_sequence_length": 4096,
