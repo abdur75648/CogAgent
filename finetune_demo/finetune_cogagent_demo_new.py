@@ -313,7 +313,7 @@ if __name__ == '__main__':
     
     # Add "[VG]" token to the tokenizer
     tokenizer.add_special_tokens({'additional_special_tokens': ["[VG]"]})
-    # print(tokenizer.vocab_size) # 32000 because special tokens are not counted
+    # print(tokenizer.vocab_size) # 32000 because special tokens are not counted -> Chnaged to 320001
     # print(tokenizer.convert_tokens_to_ids("[VG]")) # 32000
     args.vg_token_idx = tokenizer.convert_tokens_to_ids("[VG]")
     assert args.vg_token_idx == tokenizer.convert_tokens_to_ids("[VG]")
