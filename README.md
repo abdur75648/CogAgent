@@ -30,6 +30,7 @@ cd model/cogagent-vqa/1/
 wget https://huggingface.co/abdur75648/CogAgent-VQA/resolve/main/mp_rank_00_model_states.pt?download=true -O mp_rank_00_model_states.pt
 cd ../../../
 cd finetune_demo
+wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha2/groundingdino_swinb_cogcoor.pth
 bash finetune_cogagent_lora.sh
 ```
 

@@ -14,6 +14,16 @@ class GroundingMixin(BaseMixin):
     def __init__(self, vision_branch_args, precision='fp16'):
         super().__init__()
         self.visual_grounding_model, self.criterion_grounding = build_groundingdino(vision_branch_args)
+        
+        if vision_branch_args.pretrained is not None:
+            state_dict = torch.load(vision_branch_args.pretrained)['model']
+            new_state_dict = {}
+            for k,v in list(state_dict.items()):
+                if 'transformer.tgt_embed.weight' not in k and 'class' not in k:
+                    new_state_dict[k] = v
+            msg = self.visual_grounding_model.load_state_dict(new_state_dict, strict=False)
+            print("\nLoaded pretrained groundindino model from {} with msg: {}".format(vision_branch_args.pretrained, msg))
+        
         # if precision == "bf16":
         #     self.visual_grounding_model.to(device='cuda', dtype=torch.bfloat16)
         # elif precision == 'fp16':

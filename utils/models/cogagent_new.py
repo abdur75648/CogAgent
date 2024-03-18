@@ -346,6 +346,9 @@ class CogAgentModelNew(LLaMAModel):
         # loss_dict = self.get_mixin('grounding').criterion_grounding(bbox_outputs, target, initial_pred_embeddings[gt_ids].unsqueeze(1))
         # weight_dict = self.get_mixin('grounding').criterion_grounding.weight_dict
         # vg_loss = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
+        
+        # print("pred_logits: ",bbox_outputs['pred_logits'].shape) # torch.Size([1, 900, 256])
+        # print("pred_boxes: ",bbox_outputs['pred_boxes'].shape) # torch.Size([1, 900, 4])
     
         bbox_outputs_dict = {}
         bbox_outputs_dict['bbox_outputs'] = bbox_outputs
@@ -353,13 +356,12 @@ class CogAgentModelNew(LLaMAModel):
         bbox_outputs_dict['target'] = target
         bbox_outputs_dict['initial_pred_embeddings'] = initial_pred_embeddings
         
-        print("\n"*5)
-        print(bbox_outputs)
-        print(bbox_outputs_dict)
-        print(llm_output[0])
-        exit()
-        print("\n"*5)
-            
+        # print("\n"*5)
+        # print(llm_output.shape)
+        # print(bbox_outputs_dict)
+        # print(llm_output[0])
+        # print("\n"*5)
+        
         return llm_output[0], bbox_outputs_dict
 
 
