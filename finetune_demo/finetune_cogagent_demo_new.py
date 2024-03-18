@@ -1,4 +1,5 @@
 import os
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 import json
 import torch
 import argparse
@@ -164,6 +165,7 @@ def chat(model, tokenizer, tokens,
 
 
 def forward_step_eval(data_iterator, model, args, timers):
+    raise NotImplementedError
     def compute_metrics(eval_preds):
         preds, labels, device = eval_preds
         preds = preds.unsqueeze(0)
@@ -242,18 +244,31 @@ def forward_step(data_iterator, model, args, timers):
     # Shift so that tokens < n predict n
     shift_labels = labels[..., 1:].contiguous()
     shift_logits = lm_logits[..., -1-shift_labels.size(-1):-1, :].contiguous()
+    # print("shift_labels: ", shift_labels.shape)
+    # print("Unqiue values in shift_labels: ", torch.unique(shift_labels))
+    # print("shift_logits: ", shift_logits.shape)
+    # print("Unqiue values in shift_logits: ", torch.unique(shift_logits))
     # Flatten the tokens
-    loss_fct = CrossEntropyLoss(ignore_index=-100)
-    llm_loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
-    llm_loss = llm_loss.to(torch.float32)
+    # loss_fct = CrossEntropyLoss(ignore_index=-100)
+    # llm_loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+    # llm_loss = llm_loss.to(torch.float32)
+    
+    llm_loss = torch.tensor(0, dtype=torch.float32, device=shift_logits.device)
     
     bbox_outputs = bbox_outputs_dict['bbox_outputs']
     gt_ids = bbox_outputs_dict['gt_ids']
     target = bbox_outputs_dict['target']
     initial_pred_embeddings = bbox_outputs_dict['initial_pred_embeddings']
-    gnd_loss = model.get_mixin('grounding').criterion_grounding(bbox_outputs, target, initial_pred_embeddings[gt_ids].unsqueeze(1))
-
-    return [llm_loss,gnd_loss], {'llm_loss': llm_loss, 'gnd_loss': gnd_loss}
+    gnd_loss_dict = model.get_mixin('grounding').criterion_grounding(bbox_outputs, target, initial_pred_embeddings[gt_ids].unsqueeze(1))
+    weight_dict = model.get_mixin('grounding').criterion_grounding.weight_dict
+    gnd_loss = sum(gnd_loss_dict[k] * weight_dict[k] for k in gnd_loss_dict.keys() if k in weight_dict)
+    
+    gnd_loss = gnd_loss.to(torch.float32)
+    
+    total_loss = llm_loss + gnd_loss
+    loss_dict = {'llm_loss': llm_loss, 'gnd_loss': gnd_loss, 'total_loss': total_loss}
+    print(loss_dict)
+    return total_loss, loss_dict
 
 from utils.utils import ItemDataset
 def create_dataset_function(image_processor, text_processor, cross_image_processor, grounding_image_processor, path, args):
