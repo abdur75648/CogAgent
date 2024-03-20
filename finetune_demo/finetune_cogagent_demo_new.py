@@ -16,7 +16,7 @@ from utils.utils import llama2_text_processor, llama2_text_processor_inference, 
 def disable_untrainable_params(self):
     total_trainable = 0
     # enable = ['vit']
-    enable = ["encoder", "cross_attention", "linear_proj", 'mlp.vision', 'rotary.vision', 'eoi', 'boi', 'vit']
+    enable = ["encoder", "cross_attention", "linear_proj", 'mlp.vision', 'rotary.vision', 'eoi', 'boi', 'vit', 'grounding_fc']
     if self.args.use_ptuning:
         enable.extend(['ptuning'])
     if self.args.use_lora or self.args.use_qlora:
@@ -39,6 +39,7 @@ def disable_untrainable_params(self):
             if 'encoder' in n or 'vit' in n:
                 p.lr_scale = 0.1
             print_rank0(n)
+    
     print_rank0("***** Total trainable parameters: "+str(total_trainable)+" *****")
 
 FineTuneTrainCogAgentModel.disable_untrainable_params = disable_untrainable_params
@@ -249,11 +250,11 @@ def forward_step(data_iterator, model, args, timers):
     # print("shift_logits: ", shift_logits.shape)
     # print("Unqiue values in shift_logits: ", torch.unique(shift_logits))
     # Flatten the tokens
-    # loss_fct = CrossEntropyLoss(ignore_index=-100)
-    # llm_loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
-    # llm_loss = llm_loss.to(torch.float32)
+    loss_fct = CrossEntropyLoss(ignore_index=-100)
+    llm_loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+    llm_loss = llm_loss.to(torch.float32)
     
-    llm_loss = torch.tensor(0, dtype=torch.float32, device=shift_logits.device)
+    # llm_loss = torch.tensor(0, dtype=torch.float32, device=shift_logits.device)
     
     bbox_outputs = bbox_outputs_dict['bbox_outputs']
     gt_ids = bbox_outputs_dict['gt_ids']
@@ -271,8 +272,8 @@ def forward_step(data_iterator, model, args, timers):
     return total_loss, loss_dict
 
 from utils.utils import ItemDataset
-def create_dataset_function(image_processor, text_processor, cross_image_processor, grounding_image_processor, path, args):
-    dataset = ItemDataset(image_processor, text_processor, args, path, cross_image_processor=cross_image_processor, grounding_image_processor = grounding_image_processor)
+def create_dataset_function(image_processor, text_processor, cross_image_processor, grounding_image_processor, vg_token, path, args):
+    dataset = ItemDataset(image_processor, text_processor, args, path, cross_image_processor=cross_image_processor, grounding_image_processor = grounding_image_processor,vg_token=vg_token)
     return dataset
 
 from sat.model.finetune.lora2 import LoraMixin
@@ -311,19 +312,24 @@ if __name__ == '__main__':
     # print(tokenizer.eos_token_id, tokenizer.convert_ids_to_tokens(tokenizer.eos_token_id)) # 2, </s>
     # print(tokenizer.unk_token_id, tokenizer.convert_ids_to_tokens(tokenizer.unk_token_id)) # 0, <unk>
     
-    # Add "[VG]" token to the tokenizer
-    tokenizer.add_special_tokens({'additional_special_tokens': ["[VG]"]})
-    # print(tokenizer.vocab_size) # 32000 because special tokens are not counted -> Chnaged to 320001
-    # print(tokenizer.convert_tokens_to_ids("[VG]")) # 32000
-    args.vg_token_idx = tokenizer.convert_tokens_to_ids("[VG]")
-    assert args.vg_token_idx == tokenizer.convert_tokens_to_ids("[VG]")
+    #### ISSUE -> Add "[VG]" token to the tokenizer -> THIS IS NOT PROVIDED IN SAT LIBRARY
+    # tokenizer.add_special_tokens({'additional_special_tokens': ["[VG]"]})
+    # args.vg_token_idx = tokenizer.convert_tokens_to_ids("[VG]")
+    # assert args.vg_token_idx == tokenizer.convert_tokens_to_ids("[VG]")
+    
+    ####### Temprorary Fix ########
+    vg_token = "给"
+    print("Using VG token: ", vg_token)
+    args.vg_token_idx = tokenizer.convert_tokens_to_ids(vg_token)
+    print("VG token index: ", args.vg_token_idx) # 31999
+    assert args.vg_token_idx == tokenizer.convert_tokens_to_ids(vg_token)
     
     image_processor = get_image_processor(args.eva_args["image_size"][0])
     cross_image_processor = get_image_processor(args.cross_image_pix)
     grounding_image_processor = get_grounding_image_processor(args.gnd_image_pix)
     text_processor = llama2_text_processor(tokenizer, args.max_length, args.image_length)
 
-    model, args = FineTuneTrainCogAgentModel.from_pretrained(args.from_pretrained, args,build_only=True, overwrite_args={'model_parallel_size': args.model_parallel_size} if args.model_parallel_size != 1 else {})
+    model, args = FineTuneTrainCogAgentModel.from_pretrained(args.from_pretrained, args, overwrite_args={'model_parallel_size': args.model_parallel_size} if args.model_parallel_size != 1 else {})
     
     print("Model Created", flush=True)
     print("Model Size: ", sum(p.numel() for p in model.parameters())/1e6, "M", flush=True)
@@ -341,7 +347,7 @@ if __name__ == '__main__':
     if args.use_qlora and torch.cuda.is_available():
         model = model.to('cuda')
 
-    model = training_main(args, model_cls=model, forward_step_function=forward_step, create_dataset_function=partial(create_dataset_function, image_processor, text_processor, cross_image_processor,grounding_image_processor), collate_fn=partial(data_collator, cross_image_processor=cross_image_processor), forward_step_eval=forward_step_eval)
+    model = training_main(args, model_cls=model, forward_step_function=forward_step, create_dataset_function=partial(create_dataset_function, image_processor, text_processor, cross_image_processor,grounding_image_processor,vg_token), collate_fn=partial(data_collator, cross_image_processor=cross_image_processor), forward_step_eval=forward_step_eval)
     if args.use_lora:
         model.get_mixin("lora").merge_lora()
         model.get_mixin("eva").vit_model.get_mixin("lora").merge_lora()

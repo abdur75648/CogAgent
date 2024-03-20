@@ -275,6 +275,8 @@ class CogAgentModelNew(LLaMAModel):
         initial_pred_embeddings = pred_embeddings
         
         vg_token_counts = vg_token_mask.int().sum(-1)
+        assert vg_token_counts.sum() == 1 ###### Only one VG token is supported currently
+        
         vg_token_offset = vg_token_counts.cumsum(-1)
         vg_token_offset = torch.cat([torch.zeros(1).long().cuda(), vg_token_offset], dim=0)
         

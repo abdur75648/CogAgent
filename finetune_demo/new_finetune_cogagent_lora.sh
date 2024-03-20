@@ -2,7 +2,7 @@
 # export PATH=/usr/local/cuda/bin:$PATH
 # export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
-NUM_GPUS_PER_WORKER=1
+NUM_GPUS_PER_WORKER=8
 MP_SIZE=1
 
 script_path=$(realpath $0)
@@ -62,7 +62,7 @@ gpt_options=" \
 
               
 
-run_cmd="${OPTIONS_NCCL} ${OPTIONS_SAT} deepspeed  --include localhost:0 --master_port 16666 --hostfile ${HOST_FILE_PATH} finetune_cogagent_demo_new.py ${gpt_options}"
+run_cmd="${OPTIONS_NCCL} ${OPTIONS_SAT} deepspeed --master_port 16666 --hostfile ${HOST_FILE_PATH} finetune_cogagent_demo_new.py ${gpt_options}"
 echo ${run_cmd}
 eval ${run_cmd}
 

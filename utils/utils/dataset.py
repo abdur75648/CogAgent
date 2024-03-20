@@ -72,11 +72,13 @@ def read_json(path):
         return data
 
 class ItemDataset(Dataset):
-    def __init__(self, image_processor, text_processor, args, data_dirs, cross_image_processor=None,grounding_image_processor=None, **kwargs):
+    def __init__(self, image_processor, text_processor, args, data_dirs, cross_image_processor=None,grounding_image_processor=None, vg_token="[VG]", **kwargs):
         super().__init__()
         self.data = self.load_data(data_dirs)
         self.image_processor, self.text_processor, self.cross_image_processor = image_processor, text_processor, cross_image_processor
         self.grounding_image_processor = grounding_image_processor
+        self.vg_token = vg_token
+        print("Creating dataset using the VG token: ", vg_token)
     
     def process_img(self, img):
         img_dict = {'vision': self.image_processor(img)}
@@ -140,8 +142,9 @@ class ItemDataset(Dataset):
         left_part = label.split(bbox_gt[0])[0].strip()
         label = left_part + " " + right_part
         
+        label = label.replace(self.vg_token, "")
         # Add VG token
-        label = label + '[VG]'
+        label = label + self.vg_token
         
         bbox_gt = bbox_gt[0].replace("[", "").replace("]", "")
         if "," in bbox_gt:
