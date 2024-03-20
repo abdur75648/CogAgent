@@ -266,7 +266,7 @@ def forward_step(data_iterator, model, args, timers):
     
     gnd_loss = gnd_loss.to(torch.float32)
     
-    total_loss = llm_loss + gnd_loss
+    total_loss = llm_loss + gnd_loss*0.1
     loss_dict = {'llm_loss': llm_loss, 'gnd_loss': gnd_loss, 'total_loss': total_loss}
     print(loss_dict)
     return total_loss, loss_dict

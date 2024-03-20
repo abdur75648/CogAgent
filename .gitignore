@@ -8,6 +8,7 @@ __pycache__
 **/*.egg
 output.png
 fewshot-data/
+data/
 checkpoints/
 records.db
 server.py
