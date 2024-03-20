@@ -42,6 +42,16 @@ cd ../basic_demo
 python web_demo.py --from_pretrained cogagent-vqa --version chat_old --bf16
 ```
 
+## Dataset
+* Download '16k-Apollo-MLLM-data' folder
+* Run the following commands to extract the dataset
+```bash
+python3 get_16k_CogAgent_data.py
+mkdir json
+mv final_dataset.json json/apollo_ferret_noscale.json
+```
+* Move the folder to `data/` folder
+
 
 ## Citation and references
 
