@@ -1,12 +1,13 @@
 import os
-os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
+# os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 import json
 import torch
 import argparse
 from functools import partial
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+import numpy as np
+from torch.nn import CrossEntropyLoss
 from sat import mpu, get_args, get_tokenizer
 from sat.training.deepspeed_training import training_main
 from sat.helpers import print_rank0
@@ -136,99 +137,6 @@ def get_batch(data_iterator, args, timers):
                 data_b[k] = data_b[k].bfloat16()
     return data_b
 
-from torch.nn import CrossEntropyLoss
-import numpy as np
-
-from sat.model.mixins import CachedAutoregressiveMixin
-from sat.generation.autoregressive_sampling import filling_sequence
-from sat.generation.sampling_strategies import BaseStrategy, BeamSearchStrategy
-
-
-def chat(model, tokenizer, tokens,
-         max_length: int = 1800, num_beams=5, top_p=0.95, top_k=0, temperature=0.8, **kwargs):
-    inputs = tokens.to(model.parameters().__next__().device)[0]
-    seq = torch.cat(
-        [inputs, torch.tensor([-1] * (max_length - len(inputs)), device=inputs.device)], dim=0
-    )
-    strategy = BaseStrategy(temperature=temperature, top_p=0.4, top_k=1, end_tokens=[tokenizer.eos_token_id])
-    # strategy = BeamSearchStrategy(temperature=temperature, top_p=top_p, top_k=top_k, end_tokens=[tokenizer.eos_token_id],
-    #                               num_beams=num_beams, consider_end=True)
-    get_func = llama2_text_processor_inference.get_func(None, None, image_rope_mask=kwargs['image_rope_mask'])
-    output = filling_sequence(
-        model, seq,
-        batch_size=1,
-        strategy=strategy,
-        get_masks_and_position_ids=get_func,
-        **kwargs
-    )[0]  # drop memory
-
-    return output
-
-
-def forward_step_eval(data_iterator, model, args, timers):
-    raise NotImplementedError
-    def compute_metrics(eval_preds):
-        preds, labels, device = eval_preds
-        preds = preds.unsqueeze(0)
-        if isinstance(preds, tuple):
-            preds = preds[0]
-        decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
-        if args.ignore_pad_token_for_loss:
-            # Replace -100 in the labels as we can't decode them.
-            labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
-        decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
-
-        score_dict = {
-            "acc": [],
-            "acc_w/o_case": [],
-        }
-        for pred, label in zip(decoded_preds, decoded_labels):
-            if args.rank == 0:
-                print('pred', pred, 'label', label, flush=True)
-            if pred == label:
-                score_dict['acc'].append(1.)
-            else:
-                score_dict['acc'].append(0.)
-            if pred.lower() == label.lower():
-                score_dict['acc_w/o_case'].append(1.)
-            else:
-                score_dict['acc_w/o_case'].append(0.)
-            
-
-        for k, v in score_dict.items():
-            score_dict[k] = float(np.mean(v))
-        return score_dict
-
-    # Get the batch.
-    timers('batch generator').start()
-    data_b = get_batch(
-        data_iterator, args,
-        timers)
-    timers('batch generator').stop()
-
-    context_len = int(data_b['context_length'][0])
-    tokens = data_b['input_ids'][:, :context_len]
-    data_b['vision_expert_mask'] = data_b['vision_expert_mask'][:, :context_len]
-    data_b['image_embed_mask'] = data_b['image_embed_mask'][:, :context_len]
-    data_b['image_rope_mask'] = data_b['image_rope_mask'][:, :context_len]
-
-    data_b.pop('input_ids')
-    data_b.pop('attention_mask')
-    data_b.pop('position_ids')
-    labels = data_b.pop('labels')
-    qid = data_b.pop('question_id')
-
-    model.add_mixin('auto-regressive', CachedAutoregressiveMixin())
-    outputs = chat(model, tokenizer, tokens, **data_b)[0][context_len:]
-    # print(outputs)
-    model.del_mixin('auto-regressive')
-
-    return [torch.tensor(0, device=outputs.device)*2], {k: torch.tensor(v, device=outputs.device) for k, v in
-                                                    compute_metrics(
-                                                        (outputs.cpu(), labels.cpu(), outputs.device)).items()}
-
-
-from torch.nn import CrossEntropyLoss
 def forward_step(data_iterator, model, args, timers):
     """Forward step."""
 
@@ -347,7 +255,7 @@ if __name__ == '__main__':
     if args.use_qlora and torch.cuda.is_available():
         model = model.to('cuda')
 
-    model = training_main(args, model_cls=model, forward_step_function=forward_step, create_dataset_function=partial(create_dataset_function, image_processor, text_processor, cross_image_processor,grounding_image_processor,vg_token), collate_fn=partial(data_collator, cross_image_processor=cross_image_processor), forward_step_eval=forward_step_eval)
+    model = training_main(args, model_cls=model, forward_step_function=forward_step, create_dataset_function=partial(create_dataset_function, image_processor, text_processor, cross_image_processor,grounding_image_processor,vg_token), collate_fn=partial(data_collator, cross_image_processor=cross_image_processor))
     if args.use_lora:
         model.get_mixin("lora").merge_lora()
         model.get_mixin("eva").vit_model.get_mixin("lora").merge_lora()

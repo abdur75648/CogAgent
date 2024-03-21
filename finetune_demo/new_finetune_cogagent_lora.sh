@@ -49,8 +49,8 @@ gpt_options=" \
        --warmup .02 \
        --checkpoint-activations \
        --vit_checkpoint_activations \
-       --save-interval 200 \
-       --eval-interval 200 \
+       --save-interval 100 \
+       --eval-interval 50 \
        --save "./checkpoints" \
        --eval-iters 10 \
        --eval-batch-size 1 \

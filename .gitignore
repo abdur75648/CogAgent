@@ -8,6 +8,8 @@ __pycache__
 **/*.egg
 output.png
 fewshot-data/
+16k-Apollo-MLLM-data.zip
+16k-Apollo-MLLM-data/
 data/
 checkpoints/
 records.db

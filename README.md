@@ -6,7 +6,7 @@
 
 1. Basic Installations
 ```bash
-apt-get update && apt-get install zip unzip vim && apt-get install git-lfs && git lfs install
+apt-get update -y && apt-get install zip unzip vim -y && apt-get install git-lfs -y && git lfs install
 ```
 
 2. Clone this repository and navigate to CogAgent folder
@@ -15,42 +15,61 @@ git clone https://github.com/abdur75648/CogAgent
 cd CogAgent
 ```
 
-3. Install the required packages
+3. Install packages one by one
+
+3.1. Update pip and install the required packages
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt && python -m spacy download en_core_web_sm
 unzip apex.zip && cd apex && pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" ./
+```
+
+3.2. Install the required packages for the model
+```bash
 cd SwissArmyTransformer-0.4.11
 pip install -e .
 cd ../utils/models/GroundingDINO/ops
 pip install mmcv-full==1.7.2 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html
 python setup.py build install
+```
+
+3.3. Download the model weights
+```bash
 cd ../../../../
 cd model/cogagent-vqa/1/
 wget https://huggingface.co/abdur75648/CogAgent-VQA/resolve/main/mp_rank_00_model_states.pt?download=true -O mp_rank_00_model_states.pt
 cd ../../../
 wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha2/groundingdino_swinb_cogcoor.pth
+```
+<!-- Original Source of model - https://huggingface.co/THUDM/CogAgent -->
+
+4. Run the finetune script
+```bash
 cd finetune_demo
 bash finetune_cogagent_lora.sh
 ```
 
-<!-- Original Source of model - https://huggingface.co/THUDM/CogAgent -->
-
-4. Run the demo
+5. Run the demo
 ```bash
 cd ../basic_demo
 python web_demo.py --from_pretrained cogagent-vqa --version chat_old --bf16
 ```
 
 ## Dataset
-* Download '16k-Apollo-MLLM-data' folder
+* Download '16k-Apollo-MLLM-data' folder inside current directory
 * Run the following commands to extract the dataset
 ```bash
+cd 16k-Apollo-MLLM-data
 python3 get_16k_CogAgent_data.py
 mkdir json
 mv final_dataset.json json/apollo_ferret_noscale.json
 ```
-* Move the folder to `data/` folder
+* Replace the contents of `data/` folder with the contents of `16k-Apollo-MLLM-data` folder
+bash
+```bash
+rm -rf data/
+mv 16k-Apollo-MLLM-data/ data/
+```
 
 
 ## Citation and references

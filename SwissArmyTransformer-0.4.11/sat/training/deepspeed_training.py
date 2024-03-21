@@ -390,6 +390,7 @@ def train(model, optimizer, lr_scheduler,
 
         # Evaluation
         if args.eval_interval and args.iteration % args.eval_interval == 0 and args.do_valid:
+            print("\n\n\nEvaluating the model...")
             if args.strict_eval:
                 val_data_iterator = iter(val_data)
                 eval_iters = len(val_data)
