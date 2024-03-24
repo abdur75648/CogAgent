@@ -67,6 +67,9 @@ def filling_sequence(
             mems are the first-level citizens here, but we don't assume what is memorized.
             input mems are used when multi-phase generation.
     '''
+    
+    assert batch_size == 1, 'Only support batch_size == 1 for now.'
+    
     assert len(seq.shape) == 1
     if hasattr(strategy, 'num_beams') and batch_size < strategy.num_beams:
         batch_size = strategy.num_beams
@@ -85,51 +88,54 @@ def filling_sequence(
     counter = context_length - 1 # Last fixed index is ``counter'' 
     index = 0 if mems is None else mems.shape[2] # Next forward starting index, also the length of cache.
     mems_cross = None
-    # step-by-step generation
-    while counter < len(seq) - 1:
-        # Now, we want to generate seq[counter + 1],
-        # token[:, index: counter+1] needs forwarding.
+    # # step-by-step generation
+    # while counter < len(seq) - 1:
+    # # Now, we want to generate seq[counter + 1],
+    # # token[:, index: counter+1] needs forwarding.
 
-        if seq[counter + 1] >= 0: # provided
-            tokens = torch.cat(
-                (
-                tokens, 
-                    seq[counter+1: counter+2].expand(tokens.shape[0], 1)
-                ), dim=1
-            )
-            counter += 1
-            continue
+    # if seq[counter + 1] >= 0: # provided
+    #     tokens = torch.cat(
+    #         (
+    #         tokens, 
+    #             seq[counter+1: counter+2].expand(tokens.shape[0], 1)
+    #         ), dim=1
+    #     )
+    #     counter += 1
+    #     continue
 
-        # forward
-        if log_attention_weights is not None:
-            log_attention_weights_part = log_attention_weights[..., index: counter+1, :counter+1] # TODO memlen
-        else:
-            log_attention_weights_part = None
-        
-        if mems_cross is not None or 'encoder_outputs' not in kw_args:
-            kw_args['encoder_outputs'] = mems_cross
+    # forward
+    if log_attention_weights is not None:
+        log_attention_weights_part = log_attention_weights[..., index: counter+1, :counter+1] # TODO memlen
+    else:
+        log_attention_weights_part = None
+    
+    # if mems_cross is not None or 'encoder_outputs' not in kw_args:
+    #     kw_args['encoder_outputs'] = mems_cross
 
-        logits, *output_per_layers = model(
-            input_ids=tokens[:, index:], 
-            position_ids=position_ids[..., index: counter+1],
-            attention_mask=attention_mask[..., index: counter+1, :counter+1], # TODO memlen
-            mems=mems,
-            log_attention_weights=log_attention_weights_part,
-            **kw_args
-        )
-        if len(output_per_layers) > 0 and 'mem_cross' in output_per_layers[0]:
-            mems_cross = [mem['mem_cross'] for mem in output_per_layers]
-        mem_kv = [o['mem_kv'] for o in output_per_layers]
-        mems = update_mems(mem_kv, mems, max_memory_length=max_memory_length)
-        counter += 1
-        index = counter
-        # sampling
-        logits = logits[:, -1].expand(batch_size, -1) # [batch size, vocab size]
-        tokens = tokens.expand(batch_size, -1)
-        tokens, mems = strategy.forward(logits, tokens, mems)
-        if strategy.is_done:
-            break
-    return strategy.finalize(tokens, mems)
+    output_per_layers = []
+    logits, bbox_outputs_dict = model(
+    # logits, *output_per_layers = model(
+        input_ids=tokens[:, index:], 
+        position_ids=position_ids[..., index: counter+1],
+        attention_mask=attention_mask[..., index: counter+1, :counter+1], # TODO memlen
+        mems=mems,
+        log_attention_weights=log_attention_weights_part,
+        **kw_args
+    )
+    return logits, bbox_outputs_dict
+    #     if len(output_per_layers) > 0 and 'mem_cross' in output_per_layers[0]:
+    #         mems_cross = [mem['mem_cross'] for mem in output_per_layers]
+    #     mem_kv = [o['mem_kv'] for o in output_per_layers]
+    #     mems = update_mems(mem_kv, mems, max_memory_length=max_memory_length)
+    #     counter += 1
+    #     index = counter
+    #     # sampling
+    #     logits = logits[:, -1].expand(batch_size, -1) # [batch size, vocab size]
+    #     tokens = tokens.expand(batch_size, -1)
+    #     tokens, mems = strategy.forward(logits, tokens, mems)
+    #     if strategy.is_done:
+    #         break
+    # return strategy.finalize(tokens, mems), bbox_outputs_dict
 
 
 def stream_filling_sequence(

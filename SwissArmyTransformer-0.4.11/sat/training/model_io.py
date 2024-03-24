@@ -294,8 +294,9 @@ def load_checkpoint(model, args, load_path=None, prefix=''):
 
     # only load module, other hyperparameters are just for recording.
     missing_keys, unexpected_keys = module.load_state_dict(sd['module'], strict=False)
-    # remove the keys that contain the word 'grounding' (seperately added) from missing_keys
-    missing_keys = [key for key in missing_keys if 'grounding' not in key]
+    # remove the keys that contain the word 'grounding' (seperately added) from missing_keys (Only for training, not inference)
+    if args.mode != 'inference':
+        missing_keys = [key for key in missing_keys if 'grounding' not in key]
     if len(unexpected_keys) > 0:
         print_rank0(
             f'Will continue but found unexpected_keys! Check whether you are loading correct checkpoints: {unexpected_keys}.')

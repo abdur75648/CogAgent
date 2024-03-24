@@ -25,7 +25,7 @@ from sat.mpu import get_model_parallel_world_size
 from sat.model import AutoModel
 
 
-from utils.utils import chat, llama2_tokenizer, llama2_text_processor_inference, get_image_processor, parse_response
+from utils.utils import chat, llama2_tokenizer, llama2_text_processor_inference, get_image_processor, parse_response, get_grounding_image_processor
 from utils.models import CogAgentModel, CogVLMModel
 
 
@@ -75,7 +75,8 @@ def load_model(args):
         bf16=args.bf16,
         skip_init=True,
         use_gpu_initialization=True if (torch.cuda.is_available() and args.quant is None) else False,
-        device='cpu' if args.quant else 'cuda'),
+        device='cpu' if args.quant else 'cuda',
+        vg_token_idx = args.vg_token_idx),
         overwrite_args={'model_parallel_size': world_size} if world_size != 1 else {}
     )
     model = model.eval()
@@ -85,6 +86,7 @@ def load_model(args):
     tokenizer = llama2_tokenizer(args.local_tokenizer, signal_type=language_processor_version)
     image_processor = get_image_processor(model_args.eva_args["image_size"][0])
     cross_image_processor = get_image_processor(model_args.cross_image_pix) if "cross_image_pix" in model_args else None
+    grounding_image_processor = get_grounding_image_processor(args.gnd_image_pix)
 
     if args.quant:
         quantize(model, args.quant)
@@ -94,7 +96,7 @@ def load_model(args):
 
     text_processor_infer = llama2_text_processor_inference(tokenizer, args.max_length, model.image_length)
 
-    return model, image_processor, cross_image_processor, text_processor_infer
+    return model, image_processor, cross_image_processor, text_processor_infer, grounding_image_processor
 
 
 def post(
@@ -113,32 +115,34 @@ def post(
             del result_text[i]
     print(f"history {result_text}")
     
-    global model, image_processor, cross_image_processor, text_processor_infer, is_grounding
-
-    try:
-        with torch.no_grad():
-            pil_img, image_path_grounding = process_image_without_resize(image_prompt)
-            response, _, cache_image = chat(
-                    image_path="", 
-                    model=model, 
-                    text_processor=text_processor_infer,
-                    img_processor=image_processor,
-                    query=input_text, 
-                    history=result_text, 
-                    cross_img_processor=cross_image_processor,
-                    image=pil_img, 
-                    max_length=2048, 
-                    top_p=top_p, 
-                    temperature=temperature,
-                    top_k=top_k,
-                    invalid_slices=text_processor_infer.invalid_slices if hasattr(text_processor_infer, "invalid_slices") else [],
-                    no_prompt=False,
-                    args=state['args']
-            )
-    except Exception as e:
-        print("error message", e)
-        result_text.append((input_text, 'Timeout! Please wait a few minutes and retry.'))
-        return "", result_text, hidden_image
+    global model, image_processor, cross_image_processor, text_processor_infer, grounding_image_processor, is_grounding
+    
+    # try:
+    with torch.no_grad():
+        pil_img, image_path_grounding = process_image_without_resize(image_prompt)
+        # response, _, cache_image = chat(
+        response, _, cache_image, bbox_outputs_dict = chat(
+                image_path="", 
+                model=model, 
+                text_processor=text_processor_infer,
+                img_processor=image_processor,
+                grounding_img_processor=grounding_image_processor,
+                query=input_text, 
+                history=result_text, 
+                cross_img_processor=cross_image_processor,
+                image=pil_img, 
+                max_length=2048, 
+                top_p=top_p, 
+                temperature=temperature,
+                top_k=top_k,
+                invalid_slices=text_processor_infer.invalid_slices if hasattr(text_processor_infer, "invalid_slices") else [],
+                no_prompt=False,
+                args=state['args']
+        )
+    # except Exception as e:
+    #     print("error message", e)
+    #     result_text.append((input_text, 'Timeout! Please wait a few minutes and retry.'))
+    #     return "", result_text, hidden_image
 
     answer = response
     if is_grounding:
@@ -148,7 +152,10 @@ def post(
         result_text.append((None, (image_path_grounding,)))
     else:
         result_text.append((input_text, answer))
-    print(result_text)
+    
+    print("Bounding box outputs: ", bbox_outputs_dict)
+    
+    print("Text: ", result_text)
     print('finished')
     return "", result_text, hidden_image
 
@@ -161,8 +168,17 @@ def clear_fn2(value):
 
 
 def main(args):
-    global model, image_processor, cross_image_processor, text_processor_infer, is_grounding
-    model, image_processor, cross_image_processor, text_processor_infer = load_model(args)
+    global model, image_processor, cross_image_processor, text_processor_infer, grounding_image_processor, is_grounding
+    from utils.utils import llama2_tokenizer
+    tokenizer = llama2_tokenizer(args.local_tokenizer, signal_type=args.version)
+    vg_token = "给"
+    args.vg_token_idx = tokenizer.convert_tokens_to_ids(vg_token)
+    print("Total number of tokens: ", tokenizer.vocab_size)
+    print("Using VG token: ", vg_token, " with index: ", args.vg_token_idx)
+    print("\n\nargs:", args)
+    assert args.use_lora == True
+    
+    model, image_processor, cross_image_processor, text_processor_infer, grounding_image_processor = load_model(args)
     is_grounding = 'grounding' in args.from_pretrained
     
     gr.close_all()
@@ -210,7 +226,7 @@ def main(args):
 
 
     # demo.queue(concurrency_count=10)
-    demo.launch(share=True)
+    demo.launch(share=True, debug=True, show_error=True)
 
 
 if __name__ == '__main__':
@@ -227,6 +243,8 @@ if __name__ == '__main__':
     parser.add_argument("--fp16", action="store_true")
     parser.add_argument("--bf16", action="store_true")
     parser.add_argument("--stream_chat", action="store_true")
+    parser.add_argument("--gnd_image_pix", type=int, default=512, help='image pixel size for grounding processor')
+    parser.add_argument("--use_lora", action="store_true")
     args = parser.parse_args()
     rank = int(os.environ.get('RANK', 0))
     world_size = int(os.environ.get('WORLD_SIZE', 1))

@@ -128,6 +128,7 @@ sat/tokenization/icetk_glm_130B/__init__.py
 sat/tokenization/icetk_glm_130B/ice_tokenizer.py
 sat/tokenization/icetk_glm_130B/tokenizer.py
 sat/training/__init__.py
+sat/training/deepspeed_infer.py
 sat/training/deepspeed_training.py
 sat/training/deepspeed_zero0.json
 sat/training/deepspeed_zero1.json

@@ -327,6 +327,15 @@ class AutoModel():
                 if not hasattr(args, k):
                     setattr(args, k, v)
         model = get_model(args, model_cls, **kwargs)
+        if args.use_lora:
+            print_rank0("\n\nAdding LoRA to the model for inference. Expecting the model weights to be in the LoRA format. If not, please stop the process and fix it\n\m")
+            from sat.model.finetune.lora2 import LoraMixin
+            model.add_mixin("lora", LoraMixin(args.num_layers, args.lora_rank, layer_range=args.layer_range), reinit=True)
+            model.get_mixin("eva").vit_model.add_mixin("lora", LoraMixin(args.eva_args['num_layers'], args.lora_rank, layer_range=args.layer_range), reinit=True)
+        if hasattr(args, 'fp16') and args.fp16:
+            model.half()
+        elif hasattr(args, 'bf16') and args.bf16:
+            model.bfloat16()
         if not build_only:
             load_checkpoint(model, args, load_path=model_path, prefix=prefix)
         return model, args
