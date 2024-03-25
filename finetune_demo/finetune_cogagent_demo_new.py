@@ -147,7 +147,9 @@ def forward_step(data_iterator, model, args, timers):
     labels = data_b.pop('labels')
     timers('batch generator').stop()
     
-    logits, bbox_outputs_dict = model(**data_b)
+    model_outputs = model(**data_b)
+    logits = model_outputs[0][0]
+    bbox_outputs_dict = model_outputs[1]
     
     lm_logits = logits.to(torch.float32)
     # Shift so that tokens < n predict n

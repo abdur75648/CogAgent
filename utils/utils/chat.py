@@ -74,6 +74,7 @@ def chat(image_path, model, text_processor, img_processor,grounding_img_processo
             if type(gnd_dict[k]) is torch.Tensor:
                 gnd_dict[k] = gnd_dict[k].to(next(model.parameters()).device)
 
+    print("prompt: ", prompt)
     inputs_dic = text_processor(prompt)
     for k in inputs_dic:
         if type(inputs_dic[k]) is torch.Tensor and inputs_dic[k].dtype is not torch.int and inputs_dic[k].dtype is not torch.long:
@@ -149,31 +150,31 @@ def chat(image_path, model, text_processor, img_processor,grounding_img_processo
             **inputs
         )
         
-        # print("output: ", output)
+        # print("output: ", output.shape)
         
         # # )[0] # drop memory
-        # output = output[0]
+        output = output[0]
         
-        # print("output: ", output)
+        print("output: ", output.shape)
         
         # ---------------
         # port from inference_glm.py, more general than chat mode
         # clip -1s and fill back generated things into seq
-        # if type(output) is not list:
-        #     output_list = output.tolist()
-        # else:
-        #     output_list = output
-        
-        # print("output: ", output_list)
+        if type(output) is not list:
+            output_list = output.tolist()
+        else:
+            output_list = output
 
-        # response = text_processor.tokenizer.decode(output_list[0])
-    # print('original:', response)
-    # if hasattr(text_processor, 'process_response'):
-    #     response = text_processor.process_response(response)
-    # response = response.split(text_processor.sep)[-1].strip()
-    # if get_model_parallel_rank() == 0:
-    #     from utils.utils.grounding_parser import parse_response
-    #     parse_response(pil_img, response)
-    # history = history + [(query, response)]
-    # return response, history, (torch_image, pil_img, cross_image), bbox_outputs_dict
-    return text_processor,output , history, (torch_image, pil_img, cross_image), bbox_outputs_dict
+        response = text_processor.tokenizer.decode(output_list[0])
+    print('original:', response)
+    if hasattr(text_processor, 'process_response'):
+        response = text_processor.process_response(response)
+    # print('processed:', response)
+    response = response.split(text_processor.sep)[-1].strip()
+    print('final:', response)
+    if get_model_parallel_rank() == 0:
+        from utils.utils.grounding_parser import parse_response
+        parse_response(pil_img, response)
+    history = history + [(query, response)]
+    return response, history, (torch_image, pil_img, cross_image), bbox_outputs_dict
+    # return text_processor,output , history, (torch_image, pil_img, cross_image), bbox_outputs_dict

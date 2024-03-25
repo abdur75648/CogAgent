@@ -1,0 +1,8 @@
+[
+    {
+        "Question": "Task: Give me the list of all product manager with minimum 5 years of experience working in a series A company with minimum 1M in revenue. \n Previous Action: None \nGive me the next action?",
+        "Answer": "This is a dummy answer and a dummy [0.179,0.452,0.385,0.51] button",
+        "workflow": "anurag-wf-10_augmented_cropped",
+        "imagePath": "./anish-wf-6_a.png"
+    }
+]

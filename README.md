@@ -52,7 +52,7 @@ bash finetune_cogagent_lora.sh
 5. Run the demo
 ```bash
 cd ../basic_demo
-python web_demo.py --from_pretrained cogagent-vqa --version chat_old --bf16
+python web_demo.py --from_pretrained ../finetune_demo/checkpoints/finetune-cogagent-vqa-03-21-19-37/ --version chat_old --fp16 --use_lora
 ```
 
 ## Dataset

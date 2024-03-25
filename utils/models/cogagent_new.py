@@ -199,6 +199,8 @@ class CogAgentModelNew(LLaMAModel):
         # 'vision_attention_mask', 'cross_input_ids', 'cross_attention_mask', 'ratios',
         # 'image_position', 'bboxes_gt_list', 'question_id', 'vision_position_ids',
         # 'cross_position_ids'])
+        
+        
                                                
         # Input_ids Shape:  torch.Size([1, 1024])
         # Vision Expert Mask Shape:  torch.Size([1, 1024])
@@ -364,7 +366,7 @@ class CogAgentModelNew(LLaMAModel):
         # print(llm_output[0])
         # print("\n"*5)
         
-        return llm_output[0], bbox_outputs_dict
+        return [llm_output, bbox_outputs_dict]
 
 
 class FineTuneTrainCogAgentModelNew(CogAgentModelNew):

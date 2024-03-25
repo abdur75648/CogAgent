@@ -40,6 +40,23 @@ from sat.transformer_defaults import NO_WD_MODULES
 from sat.helpers import print_rank0, print_all
 from sat.model.base_model import get_model
 
+def inference_step(data_iterator, model, forward_step, args, timers):
+    """Forward model for one step."""
+    model.eval()
+    lm_logits, bbox_outputs = forward_step(data_iterator, model, args, timers)
+    return lm_logits, bbox_outputs
+
+def inference_main(args, model, forward_step_function, data_loader, handle_metrics_function=None, init_function=None, collate_fn=None, forward_step_eval=None):
+    """Main inference program."""
+    timers = Timers()  # Timer
+
+    with torch.no_grad():
+        test_data_iterator = iter(data_loader)
+        lm_logits, bbox_outputs = inference_step(test_data_iterator, model, forward_step_function, args, timers)
+    
+    return lm_logits, bbox_outputs
+
+
 def training_main(args, model_cls, forward_step_function, create_dataset_function, handle_metrics_function=None, init_function=None, collate_fn=None, forward_step_eval=None):
     """Main training program."""
     hooks = {
@@ -312,8 +329,8 @@ def get_learning_rate_scheduler(optimizer, iteration, args,
                                auto_warmup_rate=auto_warmup_rate
                                )
 
-    return lr_scheduler
-
+    return lr_scheduler  
+    
 
 def train(model, optimizer, lr_scheduler,
         train_data, val_data, timers, args, 
@@ -412,6 +429,25 @@ def train(model, optimizer, lr_scheduler,
 
     return args.iteration, skipped_iters
 
+# def forward_step(data_iterator, model, args, timers):
+#     """Forward step for the inference fucntion below."""
+
+#     # Get the batch.
+#     timers('batch generator').start()
+#     data_b = get_batch(
+#         data_iterator, args, timers)
+#     labels = data_b.pop('labels')
+#     timers('batch generator').stop()
+    
+#     model_outputs = model(**data_b)
+#     logits = model_outputs[0][0]
+#     bbox_outputs_dict = model_outputs[1]
+    
+#     lm_logits = logits.to(torch.float32)
+#     bbox_outputs = bbox_outputs_dict['bbox_outputs']
+    
+#     return lm_logits, bbox_outputs
+  
 
 def train_step(data_iterator, model, optimizer, lr_scheduler,
                args, timers, hooks=None, single_step=False, **kwargs):

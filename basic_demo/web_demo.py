@@ -115,7 +115,13 @@ def post(
             del result_text[i]
     print(f"history {result_text}")
     
-    global model, image_processor, cross_image_processor, text_processor_infer, grounding_image_processor, is_grounding
+    global model, image_processor, cross_image_processor, text_processor_infer, grounding_image_processor, is_grounding, vg_token
+    
+    input_text = input_text.replace(vg_token, "")
+    input_text += vg_token
+    
+    print("Input text: ", input_text)
+    print("Length of input text: ", len(input_text))
     
     # try:
     with torch.no_grad():
@@ -131,7 +137,7 @@ def post(
                 history=result_text, 
                 cross_img_processor=cross_image_processor,
                 image=pil_img, 
-                max_length=2048, 
+                max_length=1024, 
                 top_p=top_p, 
                 temperature=temperature,
                 top_k=top_k,
@@ -153,7 +159,7 @@ def post(
     else:
         result_text.append((input_text, answer))
     
-    print("Bounding box outputs: ", bbox_outputs_dict)
+    # print("Bounding box outputs: ", bbox_outputs_dict)
     
     print("Text: ", result_text)
     print('finished')
@@ -168,7 +174,7 @@ def clear_fn2(value):
 
 
 def main(args):
-    global model, image_processor, cross_image_processor, text_processor_infer, grounding_image_processor, is_grounding
+    global model, image_processor, cross_image_processor, text_processor_infer, grounding_image_processor, is_grounding, vg_token
     from utils.utils import llama2_tokenizer
     tokenizer = llama2_tokenizer(args.local_tokenizer, signal_type=args.version)
     vg_token = "给"
@@ -232,7 +238,7 @@ def main(args):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--max_length", type=int, default=2048, help='max length of the total sequence')
+    parser.add_argument("--max_length", type=int, default=1024, help='max length of the total sequence')
     parser.add_argument("--top_p", type=float, default=0.4, help='top p for nucleus sampling')
     parser.add_argument("--top_k", type=int, default=1, help='top k for top k sampling')
     parser.add_argument("--temperature", type=float, default=.8, help='temperature for sampling')

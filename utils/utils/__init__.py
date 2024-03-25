@@ -3,3 +3,4 @@ from .language import llama2_tokenizer, llama2_text_processor, llama2_text_proce
 from .vision import get_image_processor, get_grounding_image_processor
 from .grounding_parser import parse_response
 from .dataset import ItemDataset
+from .test_dataset import TestItemDataset
