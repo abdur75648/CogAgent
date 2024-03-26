@@ -32,6 +32,5 @@ apex/*
 *.h5
 *.ckpt
 *.log
-*.txt
 screenlog.*
 *.lock
