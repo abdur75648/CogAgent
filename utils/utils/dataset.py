@@ -153,12 +153,18 @@ class ItemDataset(Dataset):
             bbox_gt = bbox_gt.split(" ")
         img = cv2.imread(data["imagePath"])
         bbox_gt = [float(x) for x in bbox_gt]
+        debug_dict = {"bbox_original_percentage_pixel": bbox_gt}
         bbox_gt = [int(bbox_gt[0]*img.shape[1]), int(bbox_gt[1]*img.shape[0]), int(bbox_gt[2]*img.shape[1]), int(bbox_gt[3]*img.shape[0])]
+        debug_dict["bbox_original"] = bbox_gt
+        debug_dict["image_path"] = data["imagePath"]
         bboxes_gpt = [bbox_gt]
         bboxes_gpt = self.postprocess_bbox([bboxes_gpt], img_dict['ratios'])
+        debug_dict["bbox_cxcywh_gnd_percentage_pixel"] = bboxes_gpt[0].tolist()[0]
 
         uni_key = str(uuid.uuid4())
         text_dict = self.process_text(label, prompt)
+        debug_dict["label"] = label
+        debug_dict["prompt"] = prompt
         
         if text_dict is None:
             print_rank0(f"Process text failed. Please check the max_target_length & max_source_length.\n The data is {data}", level=logging.WARNING)
@@ -166,5 +172,6 @@ class ItemDataset(Dataset):
         
         text_dict.update({"bboxes_gt_list": [bboxes_gpt]})
         
-        ret = {**img_dict, **text_dict, "question_id": uni_key}
+        # ret = {**img_dict, **text_dict, "question_id": uni_key}
+        ret = {**img_dict, **text_dict, "question_id": uni_key, **debug_dict}
         return ret
